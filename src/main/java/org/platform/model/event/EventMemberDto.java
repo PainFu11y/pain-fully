@@ -22,5 +22,4 @@ public class EventMemberDto {
     @JsonProperty("members")
     private List<MemberDto> memberList;
     private ParticipantStatus status;
-    private LocalDateTime createdAt;
 }

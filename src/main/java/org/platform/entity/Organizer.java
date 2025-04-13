@@ -102,7 +102,6 @@ Parsing Organizer to OrganizerDto
             dto.setLongitude(event.getLongitude());
             dto.setStartTime(event.getStartTime());
             dto.setEndTime(event.getEndTime());
-            dto.setEventStatus(event.getEventStatus());
             dto.setContactInfo(event.getContactInfo());
             dto.setModerationStatus(event.getModerationStatus());
             dto.setModerationStatusInfo(event.getModerationStatusInfo());

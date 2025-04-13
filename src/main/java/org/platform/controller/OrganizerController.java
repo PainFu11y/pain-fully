@@ -5,20 +5,29 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.platform.entity.event.Event;
 import org.platform.entity.verification.OrganizerVerification;
 import org.platform.enums.constants.RoutConstants;
+import org.platform.model.event.EventDto;
+import org.platform.model.event.EventFilterDto;
+import org.platform.model.event.EventFilterRequest;
 import org.platform.model.organizer.OrganizerVerificationDto;
 import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
+import org.platform.model.response.PaginatedResponse;
+import org.platform.service.EventService;
 import org.platform.service.OrganizerService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Slf4j
 @RestController
@@ -27,7 +36,7 @@ import java.util.UUID;
 public class OrganizerController {
 
     private final OrganizerService organizerService;
-    private OrganizerUpdateRequestDto updatedOrganizer;
+
 
     @Operation(summary = "Создание организатора")
     @PostMapping("/create")
@@ -112,5 +121,33 @@ public class OrganizerController {
         return organizerService.sendVerifyDocument(file);
 
     }
+
+    @Operation(summary = "Получить все мероприятия текущего организатора")
+    @GetMapping("/my-events")
+    public ResponseEntity<List<EventDto>> getMyEvents() {
+        List<EventDto> events = organizerService.getMyEvents();
+        return ResponseEntity.ok(events);
+    }
+
+    @Operation(summary = "Фильтрация мероприятий текущего организатора")
+    @PostMapping("/filter")
+    public ResponseEntity<PaginatedResponse<EventFilterDto>> filterMyEvents(@RequestBody EventFilterRequest request) {
+        Page<Event> events = organizerService.filterMyEvents(request);
+
+        List<EventFilterDto> eventDtos = events.getContent()
+                .stream()
+                .map(Event::toFilterDto)
+                .collect(Collectors.toList());
+
+        PaginatedResponse<EventFilterDto> response = PaginatedResponse.<EventFilterDto>builder()
+                .content(eventDtos)
+                .page(events.getNumber())
+                .totalPages(events.getTotalPages())
+                .totalItems(events.getTotalElements())
+                .build();
+
+        return ResponseEntity.ok(response);
+    }
+
 
 }

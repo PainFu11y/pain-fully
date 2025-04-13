@@ -125,7 +125,16 @@ public class EventSpringJpa implements EventService {
                 predicates.add(cb.equal(cb.lower(tagJoin.get("name")), filter.getTag().toLowerCase()));
             }
             if (filter.getStatus() != null) {
-                predicates.add(cb.equal(root.get("eventStatus"), filter.getStatus()));
+                LocalDateTime now = LocalDateTime.now();
+
+                switch (filter.getStatus()) {
+                    case NOT_STARTED -> predicates.add(cb.greaterThan(root.get("startTime"), now));
+                    case ONGOING -> predicates.add(cb.and(
+                            cb.lessThanOrEqualTo(root.get("startTime"), now),
+                            cb.greaterThanOrEqualTo(root.get("endTime"), now)
+                    ));
+                    case FINISHED -> predicates.add(cb.lessThan(root.get("endTime"), now));
+                }
             }
 
             return cb.and(predicates.toArray(new Predicate[0]));

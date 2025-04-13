@@ -36,7 +36,6 @@ public class EventDto {
   private BigDecimal longitude;
   private LocalDateTime startTime;
   private LocalDateTime endTime;
-  private EventStatus eventStatus;
   private String contactInfo;
 
   @JsonProperty("eventTags")
@@ -59,7 +58,6 @@ public class EventDto {
     this.longitude = event.getLongitude();
     this.startTime = event.getStartTime();
     this.endTime = event.getEndTime();
-    this.eventStatus = event.getEventStatus();
     this.contactInfo = event.getContactInfo();
     this.eventTagDtoList = event.toDto().getEventTagDtoList();
     this.moderationStatus = event.getModerationStatus();

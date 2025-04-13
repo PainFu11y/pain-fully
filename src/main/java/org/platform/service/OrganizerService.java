@@ -1,10 +1,14 @@
 package org.platform.service;
 
+import org.platform.entity.event.Event;
 import org.platform.entity.verification.OrganizerVerification;
+import org.platform.model.event.EventDto;
+import org.platform.model.event.EventFilterRequest;
 import org.platform.model.organizer.OrganizerVerificationDto;
 import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
+import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
@@ -17,4 +21,7 @@ public interface OrganizerService {
     List<OrganizerDto> getAllOrganizers();
     void deleteOrganizer(UUID id);
     OrganizerVerificationDto sendVerifyDocument(MultipartFile file);
+
+    List<EventDto> getMyEvents();
+    Page<Event> filterMyEvents(EventFilterRequest filterRequest);
 }

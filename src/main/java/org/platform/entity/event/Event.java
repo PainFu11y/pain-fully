@@ -50,9 +50,6 @@ public class Event {
     private LocalDateTime startTime;
     @Column(name = "end_time",nullable = false)
     private LocalDateTime endTime;
-    @Enumerated(EnumType.STRING)
-    @Column(name = "event_status",nullable = false)
-    private EventStatus eventStatus;
     @Column(name = "contact_info",columnDefinition = "TEXT", nullable = false)
     private String contactInfo;
 
@@ -111,7 +108,6 @@ public class Event {
         eventDto.setLongitude(longitude);
         eventDto.setStartTime(startTime);
         eventDto.setEndTime(endTime);
-        eventDto.setEventStatus(eventStatus);
         eventDto.setContactInfo(contactInfo);
         eventDto.setModerationStatus(moderationStatus);
         eventDto.setModerationStatusInfo(moderationStatusInfo);
@@ -135,7 +131,6 @@ public class Event {
         dto.setLongitude(longitude);
         dto.setStartTime(startTime);
         dto.setEndTime(endTime);
-        dto.setEventStatus(eventStatus);
         dto.setContactInfo(contactInfo);
         dto.setModerationStatus(moderationStatus);
         dto.setModerationStatusInfo(moderationStatusInfo);
@@ -182,7 +177,6 @@ public class Event {
         event.setLocation(eventDto.getLocation());
         event.setStartTime(eventDto.getStartTime());
         event.setEndTime(eventDto.getEndTime());
-        event.setEventStatus(eventDto.getEventStatus());
         event.setContactInfo(eventDto.getContactInfo());
         event.setModerationStatus(eventDto.getModerationStatus());
         event.setModerationStatusInfo(eventDto.getModerationStatusInfo());

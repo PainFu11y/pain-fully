@@ -43,7 +43,6 @@ public class EventMember {
     @Enumerated(EnumType.STRING)
     private ParticipantStatus status;// в db по WILL_PARTICIPATE, PARTICIPATED,учавствую будем разделять members
 
-    private LocalDateTime createdAt;
 
     public EventMemberDto toDto(){
         EventMemberDto dto = new EventMemberDto();
@@ -51,7 +50,6 @@ public class EventMember {
         dto.setEvent(event.toDto());
         dto.setMemberList(memberList.stream().map(Member::toDto).toList());
         dto.setStatus(status);
-        dto.setCreatedAt(createdAt);
         return dto;
     }
     public static EventMember fromDto(EventMemberDto eventMemberDto){
@@ -60,7 +58,6 @@ public class EventMember {
         eventMember.setEvent(Event.fromDto(eventMemberDto.getEvent()));
         eventMember.setMemberList(eventMemberDto.getMemberList().stream().map(Member::fromDto).toList());
         eventMember.setStatus(eventMemberDto.getStatus());
-        eventMember.setCreatedAt(eventMemberDto.getCreatedAt());
         return eventMember;
     }
 }

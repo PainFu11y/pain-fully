@@ -72,7 +72,6 @@ CREATE TABLE events
     longitude         DECIMAL(10, 6),
     start_time        TIMESTAMP                       NOT NULL,
     end_time          TIMESTAMP                       NOT NULL,
-    event_status      VARCHAR(255),
     contact_info      TEXT                            NOT NULL,
     moderation_status INT,
     status_info       TEXT,

@@ -54,7 +54,6 @@ public class EventMemberJpa implements EventMemberService {
         eventMember.setEvent(event);
         eventMember.setMemberList(Collections.singletonList(currentMember));
         eventMember.setStatus(ParticipantStatus.WILL_PARTICIPATE);
-        eventMember.setCreatedAt(LocalDateTime.now());
 
         eventMemberRepository.save(eventMember);
         log.info("Пользователь {} присоединился к мероприятию {}", currentMember.getId(), eventId);

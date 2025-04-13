@@ -26,9 +26,10 @@ VALUES
     ON CONFLICT DO NOTHING;
 
 -- seed for events
+-- seed for events
 INSERT INTO events (
     id, title, description, organizer_id, format, location, event_category_id,
-    latitude, longitude, start_time, end_time, event_status, contact_info,
+    latitude, longitude, start_time, end_time, contact_info,
     moderation_status, status_info, image
 ) VALUES
       (
@@ -42,7 +43,6 @@ INSERT INTO events (
           40.1792, 44.4991,
           '2025-07-10 18:00:00',
           '2025-07-10 23:00:00',
-          'NOT_STARTED',
           'contact@festival.am',
           1,
           'Событие подтверждено',
@@ -53,13 +53,12 @@ INSERT INTO events (
           'Бег на 10 км',
           'Спортивное мероприятие для любителей и профессионалов.',
           'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb',
-          'OFFLINE',
+          'ONLINE',
           'Центральный парк, Ереван',
           '22222222-2222-2222-2222-222222222222',
           40.1811, 44.5122,
           '2025-08-15 07:00:00',
           '2025-08-15 10:00:00',
-          'NOT_STARTED',
           'sport@org2.com',
           1,
           'Регистрация открыта',
@@ -69,13 +68,13 @@ INSERT INTO events (
 
 
 
---Добавим ещё 20+ мероприятий
+--Добавим ещё 25 мероприятий
 DO $$
 BEGIN
 FOR i IN 1..25 LOOP
         INSERT INTO events (
             id, title, description, organizer_id, format, location, event_category_id,
-            latitude, longitude, start_time, end_time, event_status, contact_info,
+            latitude, longitude, start_time, end_time, contact_info,
             moderation_status, status_info, image
         ) VALUES (
             gen_random_uuid(),
@@ -83,7 +82,7 @@ FOR i IN 1..25 LOOP
             'Описание мероприятия номер ' || i,
             CASE WHEN i % 2 = 0 THEN 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid
                  ELSE 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid END,
-            'OFFLINE',
+            CASE WHEN i % 2 = 0 THEN 'OFFLINE' ELSE 'ONLINE' END,
             'Улица Арамяна, Ереван',
             CASE
                 WHEN i % 3 = 0 THEN '11111111-1111-1111-1111-111111111111'::uuid
@@ -93,7 +92,6 @@ FOR i IN 1..25 LOOP
             40.17 + i * 0.001, 44.51 + i * 0.001,
             now() + (i || ' days')::interval,
             now() + ((i+1) || ' days')::interval,
-            'NOT_STARTED',
             'info@sobitie' || i || '.am',
             1,
             'Описание статуса #' || i,
@@ -101,5 +99,6 @@ FOR i IN 1..25 LOOP
         ) ON CONFLICT DO NOTHING;
 END LOOP;
 END $$;
+
 
 

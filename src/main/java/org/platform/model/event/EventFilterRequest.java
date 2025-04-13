@@ -14,7 +14,7 @@ public class EventFilterRequest {
     private String location;
     private String category;
     private String tag;
-    private EventStatus status;
+   private EventStatus status;
 
     private int page = 0;
     private int limit = 3;
