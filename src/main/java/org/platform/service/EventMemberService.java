@@ -1,5 +1,6 @@
 package org.platform.service;
 
+import org.platform.model.event.EventParticipationDto;
 import org.platform.model.event.EventMemberDto;
 import org.springframework.http.ResponseEntity;
 
@@ -9,7 +10,7 @@ import java.util.UUID;
 public interface EventMemberService {
     ResponseEntity<String> createEvent(UUID eventId);
 
-    EventMemberDto createEventMember(EventMemberDto eventMemberDto);
+    List<EventParticipationDto> getMyEvents();
 
     EventMemberDto updateEventMember(UUID id, EventMemberDto eventMemberDto);
 

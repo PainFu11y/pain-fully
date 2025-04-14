@@ -7,7 +7,6 @@ import org.platform.entity.Organizer;
 import org.platform.entity.SocialMedia;
 import org.platform.enums.constants.DatabaseConstants;
 import org.platform.enums.event.EventFormat;
-import org.platform.enums.event.EventStatus;
 import org.platform.model.event.EventCategoryDto;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventFilterDto;
@@ -26,6 +25,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Event {
+
     @Id
     @GenericGenerator(name = "generator",strategy = "uuid2")
     @GeneratedValue(generator = "generator")
@@ -189,5 +189,7 @@ public class Event {
         event.setImage(eventDto.getImage());
         return event;
     }
+
+
 
 }

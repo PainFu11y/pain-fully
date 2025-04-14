@@ -1,9 +1,13 @@
 package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
+import org.platform.entity.Friend;
 import org.platform.entity.Member;
 import org.platform.entity.verification.VerificationToken;
+import org.platform.enums.FriendshipStatus;
 import org.platform.model.MemberDto;
+import org.platform.repository.EventMemberRepository;
+import org.platform.repository.FriendRepository;
 import org.platform.repository.MemberRepository;
 import org.platform.repository.verification.VerificationTokenRepository;
 import org.platform.service.MemberService;
@@ -30,6 +34,8 @@ public class MemberSpringJpa implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final EventMemberRepository eventMemberRepository;
+    private final FriendRepository friendRepository;
 
     @Override
     public MemberDto createMember(MemberDto memberDto) {
@@ -112,6 +118,56 @@ public class MemberSpringJpa implements MemberService {
     }
 
     @Override
+    public MemberDto getMemberProfile(UUID memberId) {
+        Member target = memberRepository.findById(memberId)
+                .orElseThrow(() -> new RuntimeException("Member not found"));
+
+        Member viewer = getCurrentAuthenticatedMember();
+
+        boolean isSameUser = viewer.getId().equals(target.getId());
+        boolean isFriend = isSameUser || areFriends(viewer.getId(), target.getId());
+
+        MemberDto dto = new MemberDto();
+        dto.setId(target.getId());
+
+        switch (target.getPrivacy()) {
+            case 0 -> { // PUBLIC
+                dto.setUsername(target.getUsername());
+                dto.setEmail(target.getEmail());
+            }
+            case 1 -> { // ONLY FRIENDS
+                if (isFriend) {
+                    dto.setUsername(target.getUsername());
+                    dto.setEmail(target.getEmail());
+                } else {
+                    dto.setUsername("Скрыто");
+                    dto.setEmail("Недоступно");
+                }
+            }
+            case 2 -> { // NO ONE
+                if (isSameUser) {
+                    dto.setUsername(target.getUsername());
+                    dto.setEmail(target.getEmail());
+                } else {
+                    dto.setUsername("Скрыто");
+                    dto.setEmail("Недоступно");
+                }
+            }
+            default -> throw new RuntimeException("Unknown privacy level: " + target.getPrivacy());
+        }
+
+        return dto;
+    }
+
+    private boolean areFriends(UUID userId1, UUID userId2) {
+        List<Friend> friends = friendRepository.findByUserId1OrUserId2(userId1, userId1);
+        return friends.stream().anyMatch(f ->
+                f.getStatus() == FriendshipStatus.ACCEPTED &&
+                        (f.getUserId1().equals(userId2) || f.getUserId2().equals(userId2)));
+    }
+
+
+    @Override
     public void deleteMember(MemberDto memberDto) {
         try {
             Optional<Member> member = memberRepository.findById(memberDto.getId());
@@ -182,6 +238,8 @@ public class MemberSpringJpa implements MemberService {
         }).orElse(false);
     }
 
+
+
     /**
      * Получение пользователя по имени пользователя
      * <p>
@@ -193,20 +251,30 @@ public class MemberSpringJpa implements MemberService {
         return this::getByUsername;
     }
 
-    /**
-     * Получение текущего пользователя
-     *
-     * @return текущий пользователь
-     */
-    public Member getCurrentUser() {
-        // Получение имени пользователя из контекста Spring Security
-        var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUsername(username);
-    }
 
     public Member getByUsername(String username) {
         return memberRepository.findByUsername(username)
                 .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
 
     }
+
+
+    private Member getCurrentAuthenticatedMember() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String currentEmail = authentication.getName();
+        Optional<Member> optionalMember = memberRepository.findByEmail(currentEmail);
+
+        if (optionalMember.isPresent()) {
+            return optionalMember.get();
+        }
+
+        throw new RuntimeException("Authenticated member not found");
+    }
+
+
+
 }

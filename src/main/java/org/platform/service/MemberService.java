@@ -24,4 +24,7 @@ public interface MemberService {
 
     boolean verifyEmailVerificationCode(String token);
 
+    MemberDto getMemberProfile(UUID memberId);
+
+
 }

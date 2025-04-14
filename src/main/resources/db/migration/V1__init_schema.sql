@@ -99,9 +99,7 @@ CREATE TABLE event_members
 (
     id         UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
     event_id   UUID      NOT NULL REFERENCES events (id) ON DELETE CASCADE,
-    member_id  UUID      NOT NULL REFERENCES members (id) ON DELETE CASCADE,
-    status     VARCHAR(255),
-    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+    member_id  UUID      NOT NULL REFERENCES members (id) ON DELETE CASCADE
 );
 
 -- 11. Event Invitations

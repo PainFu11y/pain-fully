@@ -82,6 +82,13 @@ public class MemberController {
         return members;
     }
 
+    @Operation(summary = "Получить профиль участника с учётом настроек приватности")
+    @GetMapping("/{memberId}/profile")
+    public ResponseEntity<MemberDto> getMemberProfile(@PathVariable UUID memberId) {
+        MemberDto dto = memberService.getMemberProfile(memberId);
+        return ResponseEntity.ok(dto);
+    }
+
     @Operation(summary = "Удалить пользователя")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)

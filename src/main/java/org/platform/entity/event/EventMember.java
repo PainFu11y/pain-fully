@@ -9,6 +9,8 @@ import org.hibernate.annotations.GenericGenerator;
 import org.platform.entity.Member;
 import org.platform.enums.constants.DatabaseConstants;
 import org.platform.enums.ParticipantStatus;
+import org.platform.model.MemberDto;
+import org.platform.model.event.EventDto;
 import org.platform.model.event.EventMemberDto;
 
 import java.time.LocalDateTime;
@@ -40,16 +42,27 @@ public class EventMember {
     @JoinColumn(name = "member_id", nullable = false)
     private List<Member> memberList;
 
-    @Enumerated(EnumType.STRING)
-    private ParticipantStatus status;// в db по WILL_PARTICIPATE, PARTICIPATED,учавствую будем разделять members
 
 
     public EventMemberDto toDto(){
         EventMemberDto dto = new EventMemberDto();
         dto.setId(id);
-        dto.setEvent(event.toDto());
-        dto.setMemberList(memberList.stream().map(Member::toDto).toList());
-        dto.setStatus(status);
+
+        EventDto shortEventDto = new EventDto();
+        shortEventDto.setId(event.getId());
+        shortEventDto.setTitle(event.getTitle());
+        shortEventDto.setStartTime(event.getStartTime());
+        shortEventDto.setEndTime(event.getEndTime());
+        dto.setEvent(shortEventDto);
+
+        dto.setMemberList(memberList.stream()
+                .map(member -> {
+                    MemberDto mDto = new MemberDto();
+                    mDto.setId(member.getId());
+                    mDto.setUsername(member.getUsername());
+                    mDto.setEmail(member.getEmail());
+                    return mDto;
+                }).toList());
         return dto;
     }
     public static EventMember fromDto(EventMemberDto eventMemberDto){
@@ -57,7 +70,6 @@ public class EventMember {
         eventMember.setId(eventMemberDto.getId());
         eventMember.setEvent(Event.fromDto(eventMemberDto.getEvent()));
         eventMember.setMemberList(eventMemberDto.getMemberList().stream().map(Member::fromDto).toList());
-        eventMember.setStatus(eventMemberDto.getStatus());
         return eventMember;
     }
 }

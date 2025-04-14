@@ -8,6 +8,7 @@ import org.platform.enums.constants.RoutConstants;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventFilterDto;
 import org.platform.model.event.EventFilterRequest;
+import org.platform.model.event.request.EventCreateRequest;
 import org.platform.model.response.PaginatedResponse;
 import org.platform.repository.EventRepository;
 import org.platform.service.EventService;
@@ -35,8 +36,8 @@ public class EventController {
     @Operation(summary = "Создать мероприятие")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody EventDto createEvent(@RequestBody EventDto eventDto) {
-        log.info("Received request to create event by id: {}", eventDto.getId());
+    public @ResponseBody EventDto createEvent(@RequestBody EventCreateRequest eventDto) {
+        log.info("Received request to create event by title: {}", eventDto.getTitle());
         EventDto event = eventService.createEvent(eventDto);
         log.info("Successfully created event with ID: {}", event.getId());
         return event;

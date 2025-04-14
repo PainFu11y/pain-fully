@@ -6,8 +6,10 @@ import lombok.RequiredArgsConstructor;
 import org.platform.entity.Organizer;
 import org.platform.entity.event.Event;
 import org.platform.entity.event.EventTag;
+import org.platform.helper.EventHelper;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventFilterRequest;
+import org.platform.model.event.request.EventCreateRequest;
 import org.platform.repository.EventCategoryRepository;
 import org.platform.repository.EventRepository;
 import org.platform.repository.EventTagRepository;
@@ -41,9 +43,11 @@ public class EventSpringJpa implements EventService {
     private final OrganizerRepository organizerRepository;
 
     @Override
-    public EventDto createEvent(EventDto eventDto) {
+    public EventDto createEvent(EventCreateRequest eventDto) {
+        EventHelper eventHelper = new EventHelper(organizerRepository);
         try {
-            Event event = Event.fromDto(eventDto);
+            Event event = eventHelper.fromEventCreateRequest(eventDto);
+
             Event savedEvent = eventRepository.save(event);
             return new EventDto(savedEvent);
         } catch (Exception e) {
