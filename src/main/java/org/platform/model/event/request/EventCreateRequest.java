@@ -9,7 +9,7 @@ import lombok.Setter;
 import org.platform.entity.event.Event;
 import org.platform.enums.event.EventFormat;
 import org.platform.model.event.EventCategoryDto;
-import org.platform.model.event.EventTagDto;
+import org.platform.model.eventTag.EventTagDto;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;

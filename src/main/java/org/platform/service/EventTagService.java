@@ -1,12 +1,13 @@
 package org.platform.service;
 
-import org.platform.model.event.EventTagDto;
+import org.platform.model.eventTag.EventTagCreateRequest;
+import org.platform.model.eventTag.EventTagDto;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface EventTagService {
-    EventTagDto createEventTag(EventTagDto eventDto);
+    EventTagCreateRequest createEventTag(EventTagCreateRequest eventDto);
 
     List<EventTagDto> getAllEventTags();
 

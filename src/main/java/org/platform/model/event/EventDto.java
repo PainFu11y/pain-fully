@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.platform.entity.event.Event;
 import org.platform.enums.event.EventFormat;
-import org.platform.enums.event.EventStatus;
+import org.platform.model.eventTag.EventTagDto;
 import org.platform.model.organizer.OrganizerDto;
 
 import java.math.BigDecimal;

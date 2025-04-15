@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.Size;
 import org.platform.enums.event.EventFormat;
 import org.platform.enums.event.EventStatus;
+import org.platform.model.eventTag.EventTagDto;
 import org.platform.model.organizer.OrganizerDto;
 
 import java.math.BigDecimal;

@@ -3,12 +3,19 @@ package org.platform.springJpa;
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.Organizer;
 import org.platform.entity.SocialMedia;
-import org.platform.model.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaCreateDto;
+import org.platform.model.socialMedia.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaUpdateDto;
+import org.platform.repository.OrganizerRepository;
 import org.platform.repository.SocialMediaRepository;
 import org.platform.service.SocialMediaService;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -17,21 +24,17 @@ import java.util.stream.Collectors;
 public class SocialMediaSpringJpa implements SocialMediaService {
 
     private final SocialMediaRepository socialMediaRepository;
+    private final OrganizerRepository organizerRepository;
 
     @Override
-    public SocialMediaDto createSocialMedia(SocialMediaDto socialMediaDto) {
+    public SocialMediaDto createSocialMedia(SocialMediaCreateDto socialMediaDto) {
         try {
+            Organizer organizer = getCurrentOrganizer();
+
             SocialMedia socialMedia = new SocialMedia();
             socialMedia.setName(socialMediaDto.getName());
             socialMedia.setUrl(socialMediaDto.getUrl());
-
-            if (socialMediaDto.getOrganizerId() != null) {
-                Organizer organizer = new Organizer();
-                organizer.setId(socialMediaDto.getOrganizerId());
-                socialMedia.setOrganizer(organizer);
-            } else {
-                throw new IllegalArgumentException("Organizer ID is required for social media");
-            }
+            socialMedia.setOrganizer(organizer);
 
             SocialMedia saved = socialMediaRepository.save(socialMedia);
             return saved.toDto();
@@ -41,24 +44,25 @@ public class SocialMediaSpringJpa implements SocialMediaService {
     }
 
     @Override
-    public SocialMediaDto updateSocialMedia(SocialMediaDto socialMediaDto) {
+    public SocialMediaDto updateSocialMedia(SocialMediaUpdateDto dto) {
         try {
-            SocialMedia socialMedia = socialMediaRepository.findById(socialMediaDto.getId())
+            UUID currentOrganizerId = getCurrentOrganizerId();
+
+
+            SocialMedia socialMedia = socialMediaRepository.findById(dto.getId())
                     .orElseThrow(() -> new RuntimeException("Social Media not found"));
 
-            socialMedia.setName(socialMediaDto.getName());
-            socialMedia.setUrl(socialMediaDto.getUrl());
-
-            if (socialMediaDto.getOrganizerId() != null) {
-                Organizer organizer = new Organizer();
-                organizer.setId(socialMediaDto.getOrganizerId());
-                socialMedia.setOrganizer(organizer);
-            } else {
-                throw new IllegalArgumentException("Organizer ID is required for social media");
+            if (!socialMedia.getOrganizer().getId().equals(currentOrganizerId)) {
+                throw new AccessDeniedException("You are not allowed to modify this social media entry");
             }
+
+            socialMedia.setName(dto.getName());
+            socialMedia.setUrl(dto.getUrl());
 
             SocialMedia updated = socialMediaRepository.save(socialMedia);
             return updated.toDto();
+        } catch (AccessDeniedException ade) {
+            throw ade;
         } catch (Exception e) {
             throw new RuntimeException("Error updating Social Media", e);
         }
@@ -67,9 +71,18 @@ public class SocialMediaSpringJpa implements SocialMediaService {
     @Override
     public SocialMediaDto getSocialMediaById(UUID id) {
         try {
+            UUID currentOrganizerId = getCurrentOrganizerId();
+
             SocialMedia socialMedia = socialMediaRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Social Media not found"));
+
+            if (!socialMedia.getOrganizer().getId().equals(currentOrganizerId)) {
+                throw new AccessDeniedException("You are not allowed to view this social media entry");
+            }
+
             return socialMedia.toDto();
+        } catch (AccessDeniedException ade) {
+            throw ade;
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving Social Media", e);
         }
@@ -79,7 +92,15 @@ public class SocialMediaSpringJpa implements SocialMediaService {
     @Override
     public SocialMediaDto getSocialMediaByName(String name) {
         try {
-            SocialMedia socialMedia = socialMediaRepository.findByNameContainingIgnoreCase(name);
+            UUID currentOrganizerId = getCurrentOrganizerId();
+
+            SocialMedia socialMedia = socialMediaRepository.findByNameContainingIgnoreCase(name)
+                    .orElseThrow(() -> new RuntimeException("Social Media not found"));
+
+            if (!socialMedia.getOrganizer().getId().equals(currentOrganizerId)) {
+                throw new AccessDeniedException("You are not allowed to view this social media entry");
+            }
+
             return socialMedia.toDto();
         } catch (Exception e) {
             throw new RuntimeException("Error retrieving Social Media by name", e);
@@ -100,9 +121,57 @@ public class SocialMediaSpringJpa implements SocialMediaService {
     @Override
     public void deleteSocialMedia(UUID id) {
         try {
+            UUID currentOrganizerId = getCurrentOrganizerId();
+
+            SocialMedia socialMedia = socialMediaRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Social Media not found with ID: " + id));
+
+            if (!socialMedia.getOrganizer().getId().equals(currentOrganizerId)) {
+                throw new AccessDeniedException("You are not allowed to delete this social media entry");
+            }
+
             socialMediaRepository.deleteById(id);
+        } catch (AccessDeniedException ade) {
+            throw ade;
         } catch (Exception e) {
             throw new RuntimeException("Error deleting Social Media", e);
         }
+    }
+
+
+    private List<SocialMedia> getCurrentOrganizersSocialMedia() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+        String currentEmail = authentication.getName();
+        Optional<Organizer> optionalMember = organizerRepository.findByEmail(currentEmail);
+        if (optionalMember.isEmpty()) {
+            throw new RuntimeException("Authenticated member not found");
+        }
+
+        return optionalMember.get().getSocialMedias();
+    }
+
+    private Organizer getCurrentOrganizer() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+
+        return organizerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Organizer not found by email: " + email));
+
+    }
+
+    private UUID getCurrentOrganizerId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+        String currentEmail = authentication.getName();
+        Optional<Organizer> optionalMember = organizerRepository.findByEmail(currentEmail);
+        if (optionalMember.isEmpty()) {
+            throw new RuntimeException("Authenticated organizer not found");
+        }
+        return optionalMember.get().getId();
     }
 }

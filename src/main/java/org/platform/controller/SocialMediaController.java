@@ -1,9 +1,12 @@
 package org.platform.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
-import org.platform.model.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaCreateDto;
+import org.platform.model.socialMedia.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaUpdateDto;
 import org.platform.service.SocialMediaService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,9 +22,11 @@ public class SocialMediaController {
 
     private final SocialMediaService socialMediaService;
 
+
+    @Operation(summary = "Создать запись социальной сети")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody SocialMediaDto createSocialMedia(@RequestBody SocialMediaDto socialMediaDto) {
+    public @ResponseBody SocialMediaDto createSocialMedia(@RequestBody SocialMediaCreateDto socialMediaDto) {
         log.info("Received request to create social media.");
         try {
             SocialMediaDto createdSocialMedia = socialMediaService.createSocialMedia(socialMediaDto);
@@ -32,10 +37,10 @@ public class SocialMediaController {
             throw new RuntimeException("Failed to create social media", e);
         }
     }
-
+    @Operation(summary = "Обновить запись социальной сети по ID")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public @ResponseBody SocialMediaDto updateSocialMedia(@PathVariable UUID id, @RequestBody SocialMediaDto socialMediaDto) {
+    public @ResponseBody SocialMediaDto updateSocialMedia(@PathVariable UUID id, @RequestBody SocialMediaUpdateDto socialMediaDto) {
         log.info("Received request to update social media with ID: {}", id);
         try {
             socialMediaDto.setId(id);
@@ -48,6 +53,7 @@ public class SocialMediaController {
         }
     }
 
+    @Operation(summary = "Получить запись социальной сети по ID")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody SocialMediaDto getSocialMediaById(@PathVariable UUID id) {
@@ -61,7 +67,7 @@ public class SocialMediaController {
             throw new RuntimeException("Failed to retrieve social media", e);
         }
     }
-
+    @Operation(summary = "Получить запись социальной сети по названию")
     @GetMapping("/name/{name}")
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody SocialMediaDto getSocialMediaByName(@PathVariable String name) {
@@ -75,7 +81,7 @@ public class SocialMediaController {
             throw new RuntimeException("Failed to retrieve social media", e);
         }
     }
-
+    @Operation(summary = "Получить список всех записей социальных сетей")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public @ResponseBody List<SocialMediaDto> getAllSocialMedia() {
@@ -90,6 +96,7 @@ public class SocialMediaController {
         }
     }
 
+    @Operation(summary = "Удалить запись социальной сети по ID")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteSocialMedia(@PathVariable UUID id) {

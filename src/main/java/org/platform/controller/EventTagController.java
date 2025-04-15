@@ -1,9 +1,11 @@
 package org.platform.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
-import org.platform.model.event.EventTagDto;
+import org.platform.model.eventTag.EventTagCreateRequest;
+import org.platform.model.eventTag.EventTagDto;
 import org.platform.service.EventTagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -19,15 +21,17 @@ public class EventTagController {
 
     private final EventTagService eventTagService;
 
+    @Operation(summary = "Создать новый тег мероприятия")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody EventTagDto createEventTag(@RequestBody EventTagDto eventTagDto) {
+    public @ResponseBody EventTagCreateRequest createEventTag(@RequestBody EventTagCreateRequest eventTagDto) {
         log.info("Received request to create event tag: {}", eventTagDto.getName());
-        EventTagDto createdEventTag = eventTagService.createEventTag(eventTagDto);
+        EventTagCreateRequest createdEventTag = eventTagService.createEventTag(eventTagDto);
         log.info("Successfully created event tag with name: {}", createdEventTag.getName());
         return createdEventTag;
     }
 
+    @Operation(summary = "Обновить тег мероприятия по ID")
     @PutMapping("/{id}")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public @ResponseBody EventTagDto updateEventTag(@PathVariable UUID id, @RequestBody EventTagDto eventTagDto) {
@@ -37,6 +41,7 @@ public class EventTagController {
         return updatedEventTag;
     }
 
+    @Operation(summary = "Получить тег мероприятия по ID")
     @GetMapping("/{id}")
     public @ResponseBody EventTagDto getEventTagById(@PathVariable UUID id) {
         log.info("Received request to get event tag by ID: {}", id);
@@ -45,6 +50,7 @@ public class EventTagController {
         return eventTag;
     }
 
+    @Operation(summary = "Получить тег мероприятия по названию")
     @GetMapping("/name/{name}")
     public @ResponseBody EventTagDto getEventTagByName(@PathVariable String name) {
         log.info("Received request to get event tag by name: {}", name);
@@ -53,6 +59,7 @@ public class EventTagController {
         return eventTag;
     }
 
+    @Operation(summary = "Получить список всех тегов мероприятий")
     @GetMapping
     public @ResponseBody List<EventTagDto> getAllEventTags() {
         log.info("Received request to get all event tags");
@@ -61,6 +68,7 @@ public class EventTagController {
         return eventTags;
     }
 
+    @Operation(summary = "Удалить тег мероприятия по ID")
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void deleteEventTag(@PathVariable UUID id) {

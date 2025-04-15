@@ -7,10 +7,9 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.platform.enums.constants.DatabaseConstants;
-import org.platform.model.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaDto;
 import org.platform.model.organizer.createRequest.OrganizerSocialMediaCreateDto;
 
-import java.util.List;
 import java.util.UUID;
 
 @Entity

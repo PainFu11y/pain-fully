@@ -6,6 +6,7 @@ import org.platform.entity.event.Event;
 import org.platform.entity.event.EventMember;
 import org.platform.entity.Member;
 import org.platform.enums.ParticipantStatus;
+import org.platform.model.event.EventDto;
 import org.platform.model.event.EventParticipationDto;
 import org.platform.model.event.EventMemberDto;
 import org.platform.repository.EventMemberRepository;
@@ -147,6 +148,8 @@ public class EventMemberJpa implements EventMemberService {
                     String status = event.getStartTime().isAfter(now)
                             ? ParticipantStatus.WILL_PARTICIPATE.toString()
                             : ParticipantStatus.PARTICIPATED.toString();
+                    EventDto eventDto = event.toDto();
+                    eventDto.getOrganizerDto().setPassword(null);
                     return new EventParticipationDto(event.toDto(), status);
                 })
                 .toList();

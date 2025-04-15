@@ -2,7 +2,8 @@ package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.event.EventTag;
-import org.platform.model.event.EventTagDto;
+import org.platform.model.eventTag.EventTagCreateRequest;
+import org.platform.model.eventTag.EventTagDto;
 import org.platform.repository.EventTagRepository;
 import org.platform.service.EventTagService;
 import org.springframework.stereotype.Service;
@@ -19,7 +20,7 @@ public class EventTagSpringJpa implements EventTagService {
     private final EventTagRepository eventTagRepository;
 
     @Override
-    public EventTagDto createEventTag(EventTagDto eventDto) {
+    public EventTagCreateRequest createEventTag(EventTagCreateRequest eventDto) {
         try {
             EventTag eventTag = new EventTag();
             eventTag.setName(eventDto.getName());

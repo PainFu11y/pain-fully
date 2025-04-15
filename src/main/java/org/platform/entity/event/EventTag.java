@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import org.platform.enums.constants.DatabaseConstants;
-import org.platform.model.event.EventTagDto;
+import org.platform.model.eventTag.EventTagDto;
 
 import java.util.List;
 import java.util.UUID;

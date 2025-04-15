@@ -1,12 +1,12 @@
-package org.platform.model;
+package org.platform.model.eventTag;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.platform.model.organizer.OrganizerDto;
+import org.platform.model.event.EventDto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -14,9 +14,9 @@ import java.util.UUID;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class SocialMediaDto {
+public class EventTagDto {
     private UUID id;
     private String name;
-    private String url;
-    private UUID organizerId;
+    @JsonProperty("events")
+    private List<EventDto> eventDtoList;
 }

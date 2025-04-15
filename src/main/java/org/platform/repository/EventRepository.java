@@ -15,7 +15,9 @@ public interface EventRepository extends JpaRepository<Event, UUID>, JpaSpecific
     List<Event> findByDescriptionContaining(String description);
     List<Event> findByFormat(EventFormat format);
     List<Event> findByLocationContaining(String location);
+    List<Event> findAll();
     long countByOrganizerId(UUID organizerId);
+
 
     List<Event> findByEventCategoryContaining(String category);
 }

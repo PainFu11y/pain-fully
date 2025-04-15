@@ -1,20 +1,19 @@
-package org.platform.model.event;
+package org.platform.model.socialMedia;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.util.List;
 import java.util.UUID;
+
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-public class EventCategoryDto {
+public class SocialMediaDto {
     private UUID id;
     private String name;
-    @JsonProperty("events")
-    private List<EventDto> eventDtoList;
+    private String url;
+    private UUID organizerId;
 }

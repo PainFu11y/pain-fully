@@ -58,9 +58,18 @@ public class EventSpringJpa implements EventService {
     @Override
     public List<EventDto> getAllEvents() {
         try {
-            return eventRepository.findAll().stream()
-                    .map(Event::toDto)
-                    .collect(Collectors.toList());
+           List<Event>  events = eventRepository.findAll();
+           List<EventDto> eventDtos = events.stream()
+                   .map(event -> {
+                       EventDto dto = event.toDto();
+                       if (dto.getOrganizerDto() != null) {
+                           dto.getOrganizerDto().setPassword(null);
+                       }
+                       return dto;
+                   })
+                   .collect(Collectors.toList());
+
+           return  eventDtos;
         } catch (Exception e) {
             throw new RuntimeException("Problem during getting all events" + e);
         }
@@ -85,7 +94,12 @@ public class EventSpringJpa implements EventService {
                 existingEvent.setId(optionalExistingEvent.get().getId());
 
                 Event updatedEvent = eventRepository.save(existingEvent);
-                return new EventDto(updatedEvent);
+                EventDto eventDto = new EventDto(updatedEvent);
+                if (eventDto.getOrganizerDto() != null) {
+                    eventDto.getOrganizerDto().setPassword(null);
+                }
+
+                return eventDto;
             } else {
                 throw new RuntimeException("Problem during updating event");
             }
@@ -202,6 +216,14 @@ public class EventSpringJpa implements EventService {
         return ongoingEvents;
     }
 
+
+    private UUID getCurrentOrganizerId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName(); // username == email
+        Organizer organizer = organizerRepository.findByEmail(email)
+                .orElseThrow(() -> new RuntimeException("Organizer not found by email"));
+        return organizer.getId();
+    }
 
 
 }

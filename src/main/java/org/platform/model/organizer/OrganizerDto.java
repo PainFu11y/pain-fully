@@ -4,7 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
 import org.platform.model.event.EventDto;
-import org.platform.model.SocialMediaDto;
+import org.platform.model.socialMedia.SocialMediaDto;
 
 import java.util.List;
 import java.util.UUID;
