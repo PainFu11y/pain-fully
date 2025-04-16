@@ -3,9 +3,11 @@ package org.platform.springJpa;
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.Friend;
 import org.platform.entity.Member;
+import org.platform.entity.Organizer;
 import org.platform.entity.verification.VerificationToken;
 import org.platform.enums.FriendshipStatus;
 import org.platform.model.MemberDto;
+import org.platform.model.verify.VerifyRequest;
 import org.platform.repository.EventMemberRepository;
 import org.platform.repository.FriendRepository;
 import org.platform.repository.MemberRepository;
@@ -39,7 +41,12 @@ public class MemberSpringJpa implements MemberService {
 
     @Override
     public MemberDto createMember(MemberDto memberDto) {
+
         try {
+            if (memberRepository.existsByEmail(memberDto.getEmail())) {
+                throw new IllegalArgumentException("Email уже используется");
+            }
+
             Member member = new Member();
             member.setUsername(memberDto.getUsername());
             member.setEmail(memberDto.getEmail());
@@ -49,10 +56,13 @@ public class MemberSpringJpa implements MemberService {
             member.setStatus(1);
 
             memberRepository.save(member);
+            sendEmailVerificationCode(member.getEmail());
+
             return memberDto;
         } catch (Exception e) {
             throw new RuntimeException("Error creating member", e);
         }
+
     }
 
     @Override
@@ -103,7 +113,7 @@ public class MemberSpringJpa implements MemberService {
             Optional<Member> member = memberRepository.findByUsername(name);
             return member.map(Member::toDto).orElse(null);
         } catch (Exception e) {
-           throw new RuntimeException("Could not find member with name: " + name);
+            throw new RuntimeException("Could not find member with name: " + name);
         }
     }
 
@@ -113,7 +123,7 @@ public class MemberSpringJpa implements MemberService {
             List<Member> members = memberRepository.findAll();
             return members.stream().map(Member::toDto).collect(Collectors.toList());
         } catch (Exception e) {
-           throw new RuntimeException("Error getting members from Jpa");
+            throw new RuntimeException("Error getting members from Jpa");
         }
     }
 
@@ -173,13 +183,12 @@ public class MemberSpringJpa implements MemberService {
             Optional<Member> member = memberRepository.findById(memberDto.getId());
             member.ifPresent(memberRepository::delete);
         } catch (Exception e) {
-           throw new RuntimeException("Error deleting member");
+            throw new RuntimeException("Error deleting member");
         }
     }
 
     /**
      * sending verification token to email
-     *
      */
     @Override
     public boolean sendEmailVerificationCode(String email) {
@@ -192,52 +201,50 @@ public class MemberSpringJpa implements MemberService {
         verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
         try {
             verificationTokenRepository.save(verificationToken);
-        }catch(Exception e) {
+        } catch (Exception e) {
             throw new RuntimeException("Error storing verification token");
         }
-        try{
+        try {
             emailService.sendVerificationEmail(email, token);
             return true;
-        }catch(Exception e){
+        } catch (Exception e) {
             throw new RuntimeException("Error sending verification email");
         }
 
     }
 
+
     /**
      * verifying verification token
-     *
      */
-    public boolean verifyEmailVerificationCode(String token) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String currentEmail = authentication.getName();
+    public boolean verifyEmailVerificationCode(VerifyRequest verifyRequest) {
+        String currentEmail = verifyRequest.getEmail();
 
-        return verificationTokenRepository.findByToken(token).map(verificationToken -> {
+        return verificationTokenRepository.findByToken(verifyRequest.getCode()).map(verificationToken -> {
             if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
                 return false;
             }
 
             String email = verificationToken.getEmail();
-            if(!email.equals(currentEmail)){
+            if (!email.equals(currentEmail)) {
                 return false;
             }
 
             Optional<Member> byEmail = memberRepository.findByEmail(verificationToken.getEmail());
-            if(byEmail.isPresent()) {
+            if (byEmail.isPresent()) {
                 Member member = byEmail.get();
                 member.setEmailVerified(true);
-                try{
+                try {
                     memberRepository.save(member);
-                    verificationTokenRepository.deleteByToken(token);
+                    verificationTokenRepository.deleteByEmail(currentEmail);
                     return true;
-                }catch(Exception e){
+                } catch (Exception e) {
                     throw new RuntimeException("Problem during verifying token");
                 }
             }
             return true;
         }).orElse(false);
     }
-
 
 
     /**
@@ -274,7 +281,6 @@ public class MemberSpringJpa implements MemberService {
 
         throw new RuntimeException("Authenticated member not found");
     }
-
 
 
 }

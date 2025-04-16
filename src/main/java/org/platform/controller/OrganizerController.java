@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.platform.entity.Organizer;
 import org.platform.entity.event.Event;
 import org.platform.entity.verification.OrganizerVerification;
 import org.platform.enums.constants.RoutConstants;
@@ -16,12 +17,15 @@ import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
 import org.platform.model.response.PaginatedResponse;
+import org.platform.model.verify.VerifyRequest;
 import org.platform.service.EventService;
 import org.platform.service.OrganizerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -147,6 +151,22 @@ public class OrganizerController {
                 .build();
 
         return ResponseEntity.ok(response);
+    }
+
+    @Operation(summary = "Подтверждение email по коду")
+    @PostMapping("/verify-email")
+    public ResponseEntity<String> verifyEmail(@RequestBody VerifyRequest verifyRequest) {
+        try {
+            boolean verified = organizerService.verifyEmailVerificationCodeForOrganizer(verifyRequest);
+            if (verified) {
+                return ResponseEntity.ok("Email успешно подтвержден.");
+            } else {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Код неверен или просрочен.");
+            }
+        } catch (Exception e) {
+            log.error("Ошибка при подтверждении email: {}", e.getMessage(), e);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Ошибка при подтверждении email.");
+        }
     }
 
 

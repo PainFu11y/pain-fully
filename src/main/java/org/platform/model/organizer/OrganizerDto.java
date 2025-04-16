@@ -26,6 +26,7 @@ public class OrganizerDto {
     @Schema(hidden = true)
     private boolean accreditationStatus;
     @Schema(hidden = true)
+    private boolean isEmailVerified;
     private int status;
     private String sphereOfActivity;
     private List<EventDto> events;

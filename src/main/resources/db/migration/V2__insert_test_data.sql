@@ -6,8 +6,8 @@ VALUES ('admin', 'b45cffe084dd3d20d928bee85e7b0f21', true);
 INSERT INTO eventapp.members (username, email, password, is_email_verified, privacy, status)
 VALUES
     ('painfully', '333vahe777@gmail.com', 'b45cffe084dd3d20d928bee85e7b0f21', FALSE, 0, 0),
-    ('painfully', '333vahan777@gmail.com', 'b45cffe084dd3d20d928bee85e7b0f21', FALSE, 0, 0);
-
+    ('painfully', '333vahan777@gmail.com', 'b45cffe084dd3d20d928bee85e7b0f21', FALSE, 0, 0)
+    ON CONFLICT (email) DO NOTHING;
 
 
 -- seed for event category
@@ -16,16 +16,16 @@ VALUES
     ('11111111-1111-1111-1111-111111111111', 'Концерт'),
     ('22222222-2222-2222-2222-222222222222', 'Спорт'),
     ('33333333-3333-3333-3333-333333333333', 'Образование')
-    ON CONFLICT DO NOTHING;
+    ON CONFLICT (id) DO NOTHING;
 
 -- seed for organizers
-INSERT INTO organizers (id, username, email, password, organization_name, description, accreditation_status, status, sphere_of_activity)
+INSERT INTO organizers (id, username, email, password, organization_name, description, is_email_verified, accreditation_status, status, sphere_of_activity)
 VALUES
-    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'org1', 'org1@example.com', 'b45cffe084dd3d20d928bee85e7b0f21', 'Org One', 'Организация мероприятий', TRUE, 1, 'Развлечения'),
-    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'org2', 'org2@example.com', 'b45cffe084dd3d20d928bee85e7b0f21', 'Org Two', 'Спортивные мероприятия', TRUE, 1, 'Спорт')
-    ON CONFLICT DO NOTHING;
+    ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'org1', 'org1@example.com', 'b45cffe084dd3d20d928bee85e7b0f21', 'Org One', 'Организация мероприятий', false, TRUE, 1, 'Развлечения'),
+    ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'org2', 'org2@example.com', 'b45cffe084dd3d20d928bee85e7b0f21', 'Org Two', 'Спортивные мероприятия', true, TRUE, 1, 'Спорт')
+    ON CONFLICT (email) DO NOTHING;
 
--- seed for events
+
 -- seed for events
 INSERT INTO events (
     id, title, description, organizer_id, format, location, event_category_id,

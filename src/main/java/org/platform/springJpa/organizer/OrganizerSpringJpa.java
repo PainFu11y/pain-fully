@@ -3,11 +3,14 @@ package org.platform.springJpa.organizer;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import jakarta.persistence.criteria.Join;
+import org.aspectj.weaver.ast.Or;
+import org.platform.entity.Member;
 import org.platform.entity.Organizer;
 import org.platform.entity.SocialMedia;
 import org.platform.entity.event.Event;
 import org.platform.entity.event.EventTag;
 import org.platform.entity.verification.OrganizerVerification;
+import org.platform.entity.verification.VerificationToken;
 import org.platform.enums.OrganizersVerifyStatus;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventFilterRequest;
@@ -15,11 +18,14 @@ import org.platform.model.organizer.OrganizerVerificationDto;
 import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
+import org.platform.model.verify.VerifyRequest;
 import org.platform.repository.EventRepository;
 import org.platform.repository.OrganizerRepository;
 import org.platform.repository.OrganizerVerificationRepository;
 import org.platform.repository.SocialMediaRepository;
+import org.platform.repository.verification.VerificationTokenRepository;
 import org.platform.service.OrganizerService;
+import org.platform.service.email.EmailService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -51,12 +57,18 @@ public class OrganizerSpringJpa implements OrganizerService {
     private final SocialMediaRepository socialMediaRepository;
     private final OrganizerVerificationRepository organizerVerificationRepository;
     private final EventRepository eventRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final EmailService emailService;
 
 
     @Override
     @Transactional
     public OrganizerDto createOrganizer(OrganizerCreateRequestDto dto) {
         try {
+            if (organizerRepository.existsByEmail(dto.getEmail())) {
+                throw new IllegalArgumentException("Email уже используется");
+            }
+
             Organizer organizer = new Organizer();
             organizer.setUsername(dto.getUsername());
             organizer.setEmail(dto.getEmail());
@@ -79,6 +91,8 @@ public class OrganizerSpringJpa implements OrganizerService {
                 savedOrganizer.setSocialMedias(socialMediaList);
             }
 
+            sendEmailVerificationCodeForOrganizer(savedOrganizer.getEmail());
+
             return savedOrganizer.toDto();
 
         } catch (Exception e) {
@@ -99,6 +113,7 @@ public class OrganizerSpringJpa implements OrganizerService {
             currentOrganizer.setAccreditationStatus(organizerDto.isAccreditationStatus());
             currentOrganizer.setStatus(organizerDto.getStatus());
             currentOrganizer.setSphereOfActivity(organizerDto.getSphereOfActivity());
+            currentOrganizer.setEmailVerified(organizerDto.isEmailVerified());
 
 
             currentOrganizer.setSocialMedias(organizerDto.getSocialMediaDtoList().stream()
@@ -255,6 +270,82 @@ public class OrganizerSpringJpa implements OrganizerService {
     }
 
 
+    public boolean sendEmailVerificationCodeForOrganizer(String email) {
+        Optional<Organizer> organizerOpt = organizerRepository.findByEmail(email);
+
+        if (organizerOpt.isEmpty()) {
+            throw new IllegalArgumentException("Организатор с таким email не найден");
+        }
+
+        String token = String.format("%05d", new Random().nextInt(100000));
+
+        VerificationToken verificationToken = null;
+        Optional<VerificationToken> byEmail;
+        try {
+            byEmail = verificationTokenRepository.findByEmail(email);
+        } catch (Exception e) {
+            throw new RuntimeException("Problem while getting verification by email", e);
+        }
+        if (byEmail.isPresent()) {
+            verificationToken  = byEmail.get();
+
+            if (verificationToken.getExpiryDate().minusMinutes(14).isAfter(LocalDateTime.now())) {
+                throw new RuntimeException("Код уже был отправлен недавно. Пожалуйста, подождите.");
+            }
+            verificationToken.setToken(token);
+            verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        }else {
+            verificationToken = new VerificationToken();
+            verificationToken.setToken(token);
+            verificationToken.setEmail(email);
+            verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
+        }
+        try {
+            verificationTokenRepository.save(verificationToken);
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при сохранении токена", e);
+        }
+        try {
+            emailService.sendVerificationEmail(email, token);
+            return true;
+        } catch (Exception e) {
+            throw new RuntimeException("Ошибка при отправке письма", e);
+        }
+    }
+
+
+
+    @Override
+    public boolean verifyEmailVerificationCodeForOrganizer(VerifyRequest verifyRequest) {
+        String currentEmail = verifyRequest.getEmail();
+
+        return verificationTokenRepository.findByToken(verifyRequest.getCode()).map(verificationToken -> {
+            if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+                return false;
+            }
+
+            String email = verificationToken.getEmail();
+            if (!email.equals(currentEmail)) {
+                return false;
+            }
+
+            Optional<Organizer> organizerOpt = organizerRepository.findByEmail(email);
+            if (organizerOpt.isPresent()) {
+                Organizer organizer = organizerOpt.get();
+                organizer.setEmailVerified(true);
+                try {
+                    organizerRepository.save(organizer);
+                    verificationTokenRepository.deleteByEmail(currentEmail);
+                    return true;
+                } catch (Exception e) {
+                    throw new RuntimeException("Ошибка при подтверждении токена", e);
+                }
+            }
+
+            return false;
+        }).orElse(false);
+    }
+
     private Organizer getCurrentAuthenticatedOrganizer() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         if (authentication == null || !authentication.isAuthenticated()) {
@@ -271,4 +362,5 @@ public class OrganizerSpringJpa implements OrganizerService {
 
         throw new RuntimeException("Unauthorized");
     }
+
 }

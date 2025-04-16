@@ -28,6 +28,7 @@ CREATE TABLE organizers
     password             VARCHAR(255)        NOT NULL,
     organization_name    VARCHAR(255) UNIQUE NOT NULL,
     description          TEXT,
+    is_email_verified    BOOLEAN             NOT NULL,
     accreditation_status BOOLEAN,
     status               INT,
     sphere_of_activity   VARCHAR(255)
@@ -97,9 +98,9 @@ CREATE TABLE event_tag_association
 -- 10. Event Members
 CREATE TABLE event_members
 (
-    id         UUID PRIMARY KEY   DEFAULT gen_random_uuid(),
-    event_id   UUID      NOT NULL REFERENCES events (id) ON DELETE CASCADE,
-    member_id  UUID      NOT NULL REFERENCES members (id) ON DELETE CASCADE
+    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    event_id  UUID NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+    member_id UUID NOT NULL REFERENCES members (id) ON DELETE CASCADE
 );
 
 -- 11. Event Invitations
@@ -137,7 +138,7 @@ CREATE TABLE favourite_tags
 CREATE TABLE organizers_verifications
 (
     id           UUID PRIMARY KEY,
-    organizer_id UUID UNIQUE NOT NULL REFERENCES organizers(id) ON DELETE CASCADE,
+    organizer_id UUID UNIQUE NOT NULL REFERENCES organizers (id) ON DELETE CASCADE,
     image        TEXT,
     status       VARCHAR(255)
 );

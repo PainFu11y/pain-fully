@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
 import org.platform.model.MemberDto;
+import org.platform.model.verify.VerifyRequest;
 import org.platform.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -100,21 +101,10 @@ public class MemberController {
         log.info("Successfully deleted member with ID: {}", id);
     }
 
-    @Operation(summary = "Отправить верификационный код на email")
-    @PostMapping("/send-email")
-    public ResponseEntity<String> sendEmailVerificationCode(@RequestParam String email) {
-        if(memberService.sendEmailVerificationCode(email)){
-            return ResponseEntity.ok("Verification code sent to email");
-        }else{
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-    }
-
     @Operation(summary = "Верификация email")
     @PostMapping("/verify-email")
-    public ResponseEntity<String> verifyEmailVerificationCode(@RequestParam String verificationCode) {
-        if(memberService.verifyEmailVerificationCode(verificationCode)){
+    public ResponseEntity<String> verifyEmailVerificationCode(@RequestBody VerifyRequest verifyRequest) {
+        if(memberService.verifyEmailVerificationCode(verifyRequest)){
             return ResponseEntity.ok("Verification code verified");
         }else {
             return ResponseEntity.ok("Verification code not verified");

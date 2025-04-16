@@ -10,6 +10,8 @@ import org.platform.model.request.LoginRequest;
 import org.platform.repository.MemberRepository;
 import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
+import org.platform.service.MemberService;
+import org.platform.service.OrganizerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -32,6 +34,10 @@ public class TokenSpringJpa {
     private OrganizerRepository organizerRepository;
     @Autowired
     private ModeratorRepository moderatorRepository;
+    @Autowired
+    private MemberService memberService;
+    @Autowired
+    private OrganizerService organizerService;
 
     public String getToken(LoginRequest loginRequest) {
         String token = null;
@@ -45,7 +51,13 @@ public class TokenSpringJpa {
                 Optional<Member> member = memberRepository.findByEmail(email);
                 if(member.isPresent()) {
                     loginRequest.setPassword("");
-                    token = jwtUtil.createToken(loginRequest);
+                    if(member.get().isEmailVerified()){
+                        token = jwtUtil.createToken(loginRequest);
+                    }else{
+                       memberService.sendEmailVerificationCode(email);
+                       token = "Your email verification code has been sent to your account.";
+                    }
+
                 }else{
                     throw new BadCredentialsException("Invalid username or password");
                 }
@@ -53,7 +65,13 @@ public class TokenSpringJpa {
                 Optional<Organizer> organizer = organizerRepository.findByEmail(email);
                 if(organizer.isPresent()) {
                     loginRequest.setPassword("");
-                    token = jwtUtil.createToken(loginRequest);
+                    if(organizer.get().isEmailVerified()){
+                        token = jwtUtil.createToken(loginRequest);
+                    }else {
+                        organizerService.sendEmailVerificationCodeForOrganizer(email);
+                        token = "Your email verification code has been sent to your account.";
+                    }
+
                 }
             } else if (loginRequest.getRole().equals(Role.MODERATOR)) {
                 Optional<Moderator> moderator = moderatorRepository.findByUsername(email);

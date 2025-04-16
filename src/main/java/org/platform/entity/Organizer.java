@@ -53,6 +53,9 @@ public class Organizer implements UserDetails {
     @Column(name = "accreditation_status")
     private boolean accreditationStatus;
 
+    @Column(name = "is_email_verified")
+    private boolean isEmailVerified;
+
     private int status;//0-active 1-blocked
 
     private String sphereOfActivity;
@@ -81,6 +84,7 @@ Parsing Organizer to OrganizerDto
         organizerDto.setOrganizationName(organizationName);
         organizerDto.setDescription(description);
         organizerDto.setAccreditationStatus(accreditationStatus);
+        organizerDto.setEmailVerified(isEmailVerified);
         organizerDto.setStatus(status);
         organizerDto.setSphereOfActivity(sphereOfActivity);
         if (socialMedias != null) {

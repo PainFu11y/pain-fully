@@ -27,6 +27,7 @@ public class OrganizerUpdateRequestDto {
     private List<OrganizerSocialMediaCreateDto> socialMediaDtoList;
     @Schema(hidden = true)
     private boolean accreditationStatus;
+    private boolean isEmailVerified;
     @Schema(hidden = true)
     private int status;
     private String sphereOfActivity;

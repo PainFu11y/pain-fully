@@ -1,6 +1,7 @@
 package org.platform.service;
 
 import org.platform.model.MemberDto;
+import org.platform.model.verify.VerifyRequest;
 
 import java.util.List;
 import java.util.UUID;
@@ -22,7 +23,7 @@ public interface MemberService {
 
     boolean sendEmailVerificationCode(String email);
 
-    boolean verifyEmailVerificationCode(String token);
+    boolean verifyEmailVerificationCode(VerifyRequest verifyRequest);
 
     MemberDto getMemberProfile(UUID memberId);
 

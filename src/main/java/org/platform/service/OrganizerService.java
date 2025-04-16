@@ -8,6 +8,7 @@ import org.platform.model.organizer.OrganizerVerificationDto;
 import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
+import org.platform.model.verify.VerifyRequest;
 import org.springframework.data.domain.Page;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -24,4 +25,8 @@ public interface OrganizerService {
 
     List<EventDto> getMyEvents();
     Page<Event> filterMyEvents(EventFilterRequest filterRequest);
+
+    boolean sendEmailVerificationCodeForOrganizer(String email);
+    boolean verifyEmailVerificationCodeForOrganizer(VerifyRequest verifyRequest);
+
 }

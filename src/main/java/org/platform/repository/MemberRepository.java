@@ -13,6 +13,7 @@ public interface MemberRepository extends JpaRepository<Member, UUID> {
     Optional<Member> findByUsername(String username);
 
     Member getByUsername(String username);
+    boolean existsByEmail(String email);
 
     Member getByEmail(String email);
 }
