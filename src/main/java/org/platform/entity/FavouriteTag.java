@@ -7,6 +7,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.platform.entity.event.Event;
+import org.platform.entity.event.EventTag;
 import org.platform.enums.constants.DatabaseConstants;
 
 
@@ -29,6 +30,6 @@ public class FavouriteTag {
     private Member member;
 
     @ManyToOne
-    @JoinColumn(name = "event_id")
-    private Event event;
+    @JoinColumn(name = "tag_id", nullable = false)
+    private EventTag tag;
 }

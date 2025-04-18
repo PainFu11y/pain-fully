@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.platform.model.event.EventDto;
+import org.platform.model.eventTag.EventTagDto;
 
 import java.util.UUID;
 
@@ -15,5 +16,5 @@ import java.util.UUID;
 public class FavouriteTagDto {
     private UUID id;
     private MemberDto member;
-    private EventDto event;
+    private EventTagDto tag;
 }

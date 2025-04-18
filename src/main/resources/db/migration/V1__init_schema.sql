@@ -130,9 +130,10 @@ CREATE TABLE favourite_tags
 (
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL,
-    event_id  UUID,
+    tag_id     UUID NOT NULL,
     FOREIGN KEY (member_id) REFERENCES members (id),
-    FOREIGN KEY (event_id) REFERENCES events (id)
+    FOREIGN KEY (tag_id) REFERENCES event_tags (id),
+    UNIQUE (member_id, tag_id)
 );
 
 CREATE TABLE organizers_verifications

@@ -1,5 +1,6 @@
 package org.platform.springJpa;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.Friend;
 import org.platform.entity.Member;
@@ -190,6 +191,7 @@ public class MemberSpringJpa implements MemberService {
     /**
      * sending verification token to email
      */
+    @Transactional
     @Override
     public boolean sendEmailVerificationCode(String email) {
 
@@ -219,31 +221,36 @@ public class MemberSpringJpa implements MemberService {
      */
     public boolean verifyEmailVerificationCode(VerifyRequest verifyRequest) {
         String currentEmail = verifyRequest.getEmail();
+        String code = verifyRequest.getCode();
 
-        return verificationTokenRepository.findByToken(verifyRequest.getCode()).map(verificationToken -> {
-            if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
-                return false;
-            }
+        Optional<VerificationToken> optionalToken = verificationTokenRepository.findByToken(code);
+        if (optionalToken.isEmpty()) {
+            return false;
+        }
 
-            String email = verificationToken.getEmail();
-            if (!email.equals(currentEmail)) {
-                return false;
-            }
+        VerificationToken verificationToken = optionalToken.get();
 
-            Optional<Member> byEmail = memberRepository.findByEmail(verificationToken.getEmail());
-            if (byEmail.isPresent()) {
-                Member member = byEmail.get();
-                member.setEmailVerified(true);
-                try {
-                    memberRepository.save(member);
-                    verificationTokenRepository.deleteByEmail(currentEmail);
-                    return true;
-                } catch (Exception e) {
-                    throw new RuntimeException("Problem during verifying token");
-                }
-            }
+        if (verificationToken.getExpiryDate().isBefore(LocalDateTime.now())) {
+            return false;
+        }
+
+        if (!verificationToken.getEmail().equals(currentEmail)) {
+            return false;
+        }
+        Optional<Member> optionalMember = memberRepository.findByEmail(currentEmail);
+        if (optionalMember.isEmpty()) {
+            return false;
+        }
+
+        Member member = optionalMember.get();
+        member.setEmailVerified(true);
+        try {
+            memberRepository.save(member);
+            verificationTokenRepository.deleteById(verificationToken.getId());
             return true;
-        }).orElse(false);
+        } catch (Exception e) {
+            throw new RuntimeException("Problem during verifying token", e);
+        }
     }
 
 
