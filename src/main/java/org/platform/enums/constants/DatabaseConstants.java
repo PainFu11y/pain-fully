@@ -12,7 +12,7 @@ public class DatabaseConstants {
     public static final String SOCIAL_MEDIAS_TABLE = "social_medias";
     public static final String EVENTS_MEMBERS_TABLE = "events_members";
     public static final String FRIENDS_TABLE = "friends";
-    public static final String FAVOURITE_TAGS_TABLE = "favorite_tags";
+    public static final String FAVOURITE_TAGS_TABLE = "favourite_tags";
     public static final String EVENT_INVITATIONS_TABLE = "event_invitations";
     public static final String EMAIL_TOKENS = "email_tokens";
 
