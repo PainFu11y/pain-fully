@@ -1,4 +1,4 @@
-package org.platform.service;
+package org.platform.service.event;
 
 import org.platform.model.event.EventParticipationDto;
 import org.platform.model.event.EventMemberDto;

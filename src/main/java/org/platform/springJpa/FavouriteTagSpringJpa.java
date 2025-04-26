@@ -24,7 +24,6 @@ import java.util.UUID;
 public class FavouriteTagSpringJpa implements FavouriteTagService {
     private final FavouriteTagRepository favouriteTagRepository;
     private final MemberRepository memberRepository;
-    private final EventRepository eventRepository;
     private final EventTagRepository eventTagRepository;
 
     @Override
@@ -44,31 +43,17 @@ public class FavouriteTagSpringJpa implements FavouriteTagService {
         return favouriteTagRepository.save(favouriteTag);
     }
 
-    @Override
-    public List<FavouriteTagDto> getAllFavouriteTags() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        Member member = memberRepository.findByEmail(email).orElseThrow(() -> new EntityNotFoundException("Member not found"));
-        UUID id = member.getId();
-        List<FavouriteTag> byMemberId = favouriteTagRepository.findByMemberId(id);
-
-        return byMemberId.stream()
-                .map(fav -> {
-                    fav.getMember().setPassword(null);
-                    FavouriteTagDto dto = new FavouriteTagDto();
-                    dto.setId(fav.getId());
-                    dto.setMember(fav.getMember().toDto());
-                    dto.setTag(fav.getTag().toDto());
-                    return dto;
-                })
-                .toList();
-
-    }
 
     @Override
     public List<FavouriteTagDto> getFavouriteTagForCurrentMember() {
         Member currentMember = getCurrentAuthenticatedMember();
+        List<FavouriteTag> favourites;
+        try{
+            favourites = favouriteTagRepository.findByMemberId(currentMember.getId());
+        }catch (Exception e){
+            throw new RuntimeException("Problem while getting tag");
+        }
 
-        List<FavouriteTag> favourites = favouriteTagRepository.findByMemberId(currentMember.getId());
 
         return favourites.stream()
                 .map(fav -> {

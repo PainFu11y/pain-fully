@@ -5,7 +5,7 @@ import org.platform.entity.event.EventTag;
 import org.platform.model.eventTag.EventTagCreateRequest;
 import org.platform.model.eventTag.EventTagDto;
 import org.platform.repository.EventTagRepository;
-import org.platform.service.EventTagService;
+import org.platform.service.event.EventTagService;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

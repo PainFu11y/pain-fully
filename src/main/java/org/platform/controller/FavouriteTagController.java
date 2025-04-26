@@ -19,7 +19,7 @@ public class FavouriteTagController {
 
     private final FavouriteTagService favouriteTagService;
 
-    @Operation(summary = "Добавить favourite tag конкретному member")
+    @Operation(summary = "Добавить favourite tag конкретному member(только для MEMBER)")
     @PostMapping("/{tagId}")
     public ResponseEntity<FavouriteTagDto> addFavouriteTag(@PathVariable UUID tagId) {
         FavouriteTag added = favouriteTagService.addFavouriteTag(tagId);
@@ -30,19 +30,14 @@ public class FavouriteTagController {
         return ResponseEntity.status(HttpStatus.CREATED).body(dto);
     }
 
-    @Operation(summary = "Получить все favourite tags ")
-    @GetMapping
-    public ResponseEntity<List<FavouriteTagDto>> getAllFavouriteTags() {
-        return ResponseEntity.ok(favouriteTagService.getAllFavouriteTags());
-    }
-    @Operation(summary = "Удалить favourite tag по favouriteTagID")
+    @Operation(summary = "Удалить favourite tag по favouriteTagID(только для MEMBER)")
     @DeleteMapping("/{favouriteTagId}")
     public ResponseEntity<Void> deleteFavouriteTag(@PathVariable UUID favouriteTagId) {
         favouriteTagService.deleteFavouriteTag(favouriteTagId);
         return ResponseEntity.noContent().build();
     }
 
-    @Operation(summary = "Получить favourite tags конкретного member")
+    @Operation(summary = "Получить favourite tags конкретного member(только для MEMBER)")
     @GetMapping("/my-fav-tags")
     public ResponseEntity<List<FavouriteTagDto>> getMyFavouriteTags() {
         return ResponseEntity.ok(favouriteTagService.getFavouriteTagForCurrentMember());

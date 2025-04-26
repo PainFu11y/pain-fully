@@ -12,7 +12,7 @@ import org.platform.model.event.EventMemberDto;
 import org.platform.repository.EventMemberRepository;
 import org.platform.repository.EventRepository;
 import org.platform.repository.MemberRepository;
-import org.platform.service.EventMemberService;
+import org.platform.service.event.EventMemberService;
 import org.platform.springJpa.email.EmailSpringJpa;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

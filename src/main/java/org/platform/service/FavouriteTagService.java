@@ -9,8 +9,6 @@ import java.util.UUID;
 public interface FavouriteTagService {
     FavouriteTag addFavouriteTag(UUID tagId);
 
-    List<FavouriteTagDto> getAllFavouriteTags();
-
     List<FavouriteTagDto> getFavouriteTagForCurrentMember();
 
     void deleteFavouriteTag(UUID id);

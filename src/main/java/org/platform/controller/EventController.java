@@ -11,7 +11,7 @@ import org.platform.model.event.EventFilterRequest;
 import org.platform.model.event.request.EventCreateRequest;
 import org.platform.model.response.PaginatedResponse;
 import org.platform.repository.EventRepository;
-import org.platform.service.EventService;
+import org.platform.service.event.EventService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

@@ -1,12 +1,11 @@
 package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
-import org.platform.entity.event.Event;
 import org.platform.entity.event.EventCategory;
 import org.platform.model.event.EventCategoryDto;
 import org.platform.repository.EventCategoryRepository;
 import org.platform.repository.EventRepository;
-import org.platform.service.EventCategoryService;
+import org.platform.service.event.EventCategoryService;
 import org.springframework.stereotype.Service;
 import org.springframework.web.filter.CharacterEncodingFilter;
 

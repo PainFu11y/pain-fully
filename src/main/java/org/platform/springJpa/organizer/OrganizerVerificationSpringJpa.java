@@ -1,14 +1,22 @@
 package org.platform.springJpa.organizer;
 
 import lombok.RequiredArgsConstructor;
+import org.platform.entity.Member;
+import org.platform.entity.Moderator;
 import org.platform.entity.Organizer;
 import org.platform.entity.verification.OrganizerVerification;
+import org.platform.enums.OrganizersVerifyStatus;
 import org.platform.model.organizer.OrganizerVerificationDto;
+import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
 import org.platform.repository.OrganizerVerificationRepository;
 import org.platform.service.OrganizerVerificationService;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -16,6 +24,8 @@ import java.util.UUID;
 public class OrganizerVerificationSpringJpa implements OrganizerVerificationService {
     private final OrganizerVerificationRepository verificationRepository;
     private final OrganizerRepository organizerRepository;
+    private final OrganizerVerificationRepository organizerVerificationRepository;
+    private final ModeratorRepository moderatorRepository;
 
 
     @Override
@@ -59,10 +69,36 @@ public class OrganizerVerificationSpringJpa implements OrganizerVerificationServ
     }
 
     @Override
+    public List<OrganizerVerificationDto> getInProgressAccreditations() {
+        getCurrentAuthenticatedModerator();
+        List<OrganizerVerification> inProgressVerifications = organizerVerificationRepository.findByStatus(OrganizersVerifyStatus.IN_PROGRESS);
+
+        return inProgressVerifications.stream()
+                .map(OrganizerVerification::toDto)
+                .toList();
+    }
+
+    @Override
     public void delete(UUID id) {
         if (!verificationRepository.existsById(id)) {
             throw new RuntimeException("Verification not found");
         }
         verificationRepository.deleteById(id);
+    }
+
+    private Moderator getCurrentAuthenticatedModerator() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            throw new RuntimeException("Unauthorized");
+        }
+
+        String currentEmail = authentication.getName();
+        Optional<Moderator> optionalModerator = moderatorRepository.findByUsername(currentEmail);
+
+        if (optionalModerator.isPresent()) {
+            return optionalModerator.get();
+        }
+
+        throw new RuntimeException("Authenticated moderator not found");
     }
 }

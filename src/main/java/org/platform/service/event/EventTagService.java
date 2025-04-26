@@ -1,4 +1,4 @@
-package org.platform.service;
+package org.platform.service.event;
 
 import org.platform.model.eventTag.EventTagCreateRequest;
 import org.platform.model.eventTag.EventTagDto;

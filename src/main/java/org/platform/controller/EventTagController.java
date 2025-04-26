@@ -6,7 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
 import org.platform.model.eventTag.EventTagCreateRequest;
 import org.platform.model.eventTag.EventTagDto;
-import org.platform.service.EventTagService;
+import org.platform.service.event.EventTagService;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
