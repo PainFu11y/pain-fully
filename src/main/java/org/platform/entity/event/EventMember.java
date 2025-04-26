@@ -8,12 +8,10 @@ import lombok.Setter;
 import org.hibernate.annotations.GenericGenerator;
 import org.platform.entity.Member;
 import org.platform.enums.constants.DatabaseConstants;
-import org.platform.enums.ParticipantStatus;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventMemberDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 

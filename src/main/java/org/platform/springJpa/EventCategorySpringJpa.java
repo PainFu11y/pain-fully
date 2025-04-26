@@ -50,7 +50,6 @@ public class EventCategorySpringJpa implements EventCategoryService {
                 .orElseThrow(() -> new RuntimeException("Event Category not found"));
 
         eventCategory.setName(eventcategoryDto.getName());
-        eventCategory.setEventList(eventcategoryDto.getEventDtoList().stream().map(Event::fromDto).toList());
 
         EventCategory updated = repository.save(eventCategory);
         return updated.toDto();

@@ -27,22 +27,18 @@ public class EventCategory {
 
     private String name;
 
-    @OneToMany(mappedBy = "eventCategory")
-    @RestResource(path = "events", rel = "events")
-    private List<Event> eventList;
-
     public EventCategoryDto toDto(){
         EventCategoryDto dto = new EventCategoryDto();
         dto.setId(id);
         dto.setName(name);
-        dto.setEventDtoList(eventList.stream().map(Event::toDto).toList());
+        // dto.setEventDtoList(...); убираем!
         return dto;
     }
+
     public static EventCategory fromDto(EventCategoryDto dto){
         EventCategory eventCategory = new EventCategory();
         eventCategory.setId(dto.getId());
         eventCategory.setName(dto.getName());
-        eventCategory.setEventList(dto.getEventDtoList().stream().map(Event::fromDto).toList());
         return eventCategory;
     }
 }

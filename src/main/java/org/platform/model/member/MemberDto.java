@@ -1,4 +1,4 @@
-package org.platform.model;
+package org.platform.model.member;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;

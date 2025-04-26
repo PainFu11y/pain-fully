@@ -146,7 +146,7 @@ CREATE TABLE organizers_verifications
 
 CREATE TABLE verification_token
 (
-    id          BIGSERIAL PRIMARY KEY,
+    id          UUID PRIMARY KEY,
     token       VARCHAR(255),
     email       VARCHAR(255),
     expiry_date TIMESTAMP

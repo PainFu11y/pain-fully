@@ -19,10 +19,7 @@ import org.platform.model.organizer.createRequest.OrganizerCreateRequestDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
 import org.platform.model.verify.VerifyRequest;
-import org.platform.repository.EventRepository;
-import org.platform.repository.OrganizerRepository;
-import org.platform.repository.OrganizerVerificationRepository;
-import org.platform.repository.SocialMediaRepository;
+import org.platform.repository.*;
 import org.platform.repository.verification.VerificationTokenRepository;
 import org.platform.service.OrganizerService;
 import org.platform.service.email.EmailService;
@@ -59,15 +56,18 @@ public class OrganizerSpringJpa implements OrganizerService {
     private final EventRepository eventRepository;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
+    private final MemberRepository memberRepository;
 
 
     @Override
     @Transactional
     public OrganizerDto createOrganizer(OrganizerCreateRequestDto dto) {
         try {
-            if (organizerRepository.existsByEmail(dto.getEmail())) {
+            if (organizerRepository.existsByEmail(dto.getEmail())
+                    || memberRepository.existsByEmail(dto.getEmail())) {
                 throw new IllegalArgumentException("Email уже используется");
             }
+
 
             Organizer organizer = new Organizer();
             organizer.setUsername(dto.getUsername());
@@ -78,6 +78,7 @@ public class OrganizerSpringJpa implements OrganizerService {
             organizer.setAccreditationStatus(dto.isAccreditationStatus());
             organizer.setStatus(dto.getStatus());
             organizer.setSphereOfActivity(dto.getSphereOfActivity());
+            organizer.setEvents(new ArrayList<>());
 
             Organizer savedOrganizer = organizerRepository.save(organizer);
 
@@ -269,13 +270,8 @@ public class OrganizerSpringJpa implements OrganizerService {
         return eventRepository.findAll(spec, pageable);
     }
 
-
+    @Transactional
     public boolean sendEmailVerificationCodeForOrganizer(String email) {
-        Optional<Organizer> organizerOpt = organizerRepository.findByEmail(email);
-
-        if (organizerOpt.isEmpty()) {
-            throw new IllegalArgumentException("Организатор с таким email не найден");
-        }
 
         String token = String.format("%05d", new Random().nextInt(100000));
 
@@ -287,14 +283,14 @@ public class OrganizerSpringJpa implements OrganizerService {
             throw new RuntimeException("Problem while getting verification by email", e);
         }
         if (byEmail.isPresent()) {
-            verificationToken  = byEmail.get();
+            verificationToken = byEmail.get();
 
             if (verificationToken.getExpiryDate().minusMinutes(14).isAfter(LocalDateTime.now())) {
                 throw new RuntimeException("Код уже был отправлен недавно. Пожалуйста, подождите.");
             }
             verificationToken.setToken(token);
             verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-        }else {
+        } else {
             verificationToken = new VerificationToken();
             verificationToken.setToken(token);
             verificationToken.setEmail(email);
@@ -314,7 +310,7 @@ public class OrganizerSpringJpa implements OrganizerService {
     }
 
 
-
+    @Transactional
     @Override
     public boolean verifyEmailVerificationCodeForOrganizer(VerifyRequest verifyRequest) {
         String currentEmail = verifyRequest.getEmail();

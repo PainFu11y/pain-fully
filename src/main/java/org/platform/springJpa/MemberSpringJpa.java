@@ -4,14 +4,15 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.Friend;
 import org.platform.entity.Member;
-import org.platform.entity.Organizer;
 import org.platform.entity.verification.VerificationToken;
 import org.platform.enums.FriendshipStatus;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
+import org.platform.model.member.MemberRegistrationDto;
 import org.platform.model.verify.VerifyRequest;
 import org.platform.repository.EventMemberRepository;
 import org.platform.repository.FriendRepository;
 import org.platform.repository.MemberRepository;
+import org.platform.repository.OrganizerRepository;
 import org.platform.repository.verification.VerificationTokenRepository;
 import org.platform.service.MemberService;
 import org.platform.service.email.EmailService;
@@ -37,14 +38,15 @@ public class MemberSpringJpa implements MemberService {
     private final PasswordEncoder passwordEncoder;
     private final VerificationTokenRepository verificationTokenRepository;
     private final EmailService emailService;
-    private final EventMemberRepository eventMemberRepository;
     private final FriendRepository friendRepository;
+    private final OrganizerRepository organizerRepository;
 
     @Override
-    public MemberDto createMember(MemberDto memberDto) {
+    public MemberRegistrationDto createMember(MemberRegistrationDto memberDto) {
 
         try {
-            if (memberRepository.existsByEmail(memberDto.getEmail())) {
+            if (memberRepository.existsByEmail(memberDto.getEmail())
+                    || organizerRepository.existsByEmail(memberDto.getEmail())) {
                 throw new IllegalArgumentException("Email уже используется");
             }
 

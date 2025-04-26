@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.platform.enums.InvitationStatus;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
 
 import java.util.UUID;
 

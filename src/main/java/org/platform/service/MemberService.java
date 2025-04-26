@@ -1,13 +1,14 @@
 package org.platform.service;
 
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
+import org.platform.model.member.MemberRegistrationDto;
 import org.platform.model.verify.VerifyRequest;
 
 import java.util.List;
 import java.util.UUID;
 
 public interface MemberService {
-    MemberDto createMember(MemberDto memberDto);
+    MemberRegistrationDto createMember(MemberRegistrationDto memberDto);
 
     MemberDto updateMember(MemberDto memberDto);
 

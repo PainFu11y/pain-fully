@@ -6,9 +6,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.platform.enums.ParticipantStatus;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 

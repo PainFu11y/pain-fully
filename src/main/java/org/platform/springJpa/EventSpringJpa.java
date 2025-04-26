@@ -37,21 +37,20 @@ import java.util.stream.Collectors;
 public class EventSpringJpa implements EventService {
 
     private final EventRepository eventRepository;
-    private final EventTagRepository eventTagRepository;
-    private final EventCategoryRepository eventCategoryRepository;
-    private final SpringDocHateoasConfiguration springDocHateoasConfiguration;
     private final OrganizerRepository organizerRepository;
+    private final EventHelper eventHelper;
 
     @Override
     public EventDto createEvent(EventCreateRequest eventDto) {
-        EventHelper eventHelper = new EventHelper(organizerRepository);
+        UUID currentOrganizerId = getCurrentOrganizerId();
+
         try {
-            Event event = eventHelper.fromEventCreateRequest(eventDto);
+            Event event = eventHelper.fromEventCreateRequest(eventDto, currentOrganizerId);
 
             Event savedEvent = eventRepository.save(event);
             return new EventDto(savedEvent);
         } catch (Exception e) {
-            throw new RuntimeException("Problem during creating event");
+            throw new RuntimeException("Problem during creating event" + e);
         }
     }
 

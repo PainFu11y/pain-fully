@@ -2,7 +2,7 @@ package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
 import org.platform.model.ModeratorDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.repository.MemberRepository;

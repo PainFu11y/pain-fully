@@ -4,8 +4,8 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
-import org.platform.model.event.EventDto;
 import org.platform.model.eventTag.EventTagDto;
+import org.platform.model.member.MemberDto;
 
 import java.util.UUID;
 

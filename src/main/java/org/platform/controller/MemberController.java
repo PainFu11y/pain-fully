@@ -4,7 +4,8 @@ import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
-import org.platform.model.MemberDto;
+import org.platform.model.member.MemberDto;
+import org.platform.model.member.MemberRegistrationDto;
 import org.platform.model.verify.VerifyRequest;
 import org.platform.service.MemberService;
 import org.springframework.http.HttpStatus;
@@ -25,9 +26,9 @@ public class MemberController {
     @Operation(summary = "Создание пользователя")
     @PostMapping("/create")
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody MemberDto createMember(@RequestBody MemberDto memberDto) {
+    public @ResponseBody MemberRegistrationDto createMember(@RequestBody MemberRegistrationDto memberDto) {
             log.info("Received request to create member with username: {}", memberDto.getUsername());
-            MemberDto createdMember = memberService.createMember(memberDto);
+            MemberRegistrationDto createdMember = memberService.createMember(memberDto);
             log.info("Successfully created member with username: {}", createdMember.getUsername());
             return createdMember;
         }

@@ -14,6 +14,6 @@ public class DatabaseConstants {
     public static final String FRIENDS_TABLE = "friends";
     public static final String FAVOURITE_TAGS_TABLE = "favourite_tags";
     public static final String EVENT_INVITATIONS_TABLE = "event_invitations";
-    public static final String EMAIL_TOKENS = "email_tokens";
+    public static final String EMAIL_TOKENS = "verification_token";
 
 }

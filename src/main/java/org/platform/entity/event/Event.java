@@ -101,8 +101,7 @@ public class Event {
         eventDto.setContactInfo(contactInfo);
         eventDto.setEventCategoryDto(new EventCategoryDto(
                 eventCategory.getId(),
-                eventCategory.getName(),
-                null
+                eventCategory.getName()
         ));
         eventDto.setLatitude(latitude);
         eventDto.setLongitude(longitude);
@@ -154,8 +153,7 @@ public class Event {
         // Категория
         dto.setEventCategoryDto(new EventCategoryDto(
                 eventCategory.getId(),
-                eventCategory.getName(),
-                null
+                eventCategory.getName()
         ));
 
         // Теги
