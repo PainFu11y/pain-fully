@@ -5,7 +5,7 @@ import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
 import org.platform.enums.constants.DatabaseConstants;
 import org.platform.enums.Role;
-import org.platform.model.ModeratorDto;
+import org.platform.model.moderator.ModeratorDto;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

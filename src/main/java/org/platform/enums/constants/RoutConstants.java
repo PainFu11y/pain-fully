@@ -13,6 +13,8 @@ public class RoutConstants {
     public static final String EVENT = "/event";
     public static final String EVENT_MEMBERS = "/event-member";
     public static final String AUTH = "/auth";
+    public static final String USER =  "/user";
+
 
 
 

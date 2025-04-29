@@ -1,4 +1,4 @@
-package org.platform.model;
+package org.platform.model.moderator;
 
 import lombok.*;
 

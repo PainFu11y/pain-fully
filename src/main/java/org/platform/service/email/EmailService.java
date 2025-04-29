@@ -5,8 +5,10 @@ import org.platform.entity.Member;
 import org.platform.entity.event.Event;
 
 public interface EmailService {
-    void sendVerificationEmail(String email, String token);
-    void sendMessage(String email, String message, String subject);
+    boolean sendEmailVerificationCode(String email);
+    boolean sendForgotPasswordCode(String email);
+    void sendEventJoinMessage(String to, String subject, String htmlContent);
     void sendEventInvitationEmail(Member friend, Member sender, Event event);
+
 
 }

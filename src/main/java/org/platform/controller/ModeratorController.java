@@ -5,7 +5,10 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.OrganizersVerifyStatus;
 import org.platform.enums.constants.RoutConstants;
-import org.platform.model.ModeratorDto;
+import org.platform.model.moderator.ModeratorChangeStatusRequest;
+import org.platform.model.moderator.ModeratorCreateRequest;
+import org.platform.model.moderator.ModeratorDto;
+import org.platform.model.moderator.ModeratorUpdateRequest;
 import org.platform.service.ModeratorService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,10 +25,10 @@ public class ModeratorController {
 
     private final ModeratorService moderatorService;
 
-    @Operation(summary = "Создание модератора")
+    @Operation(summary = "Создание модератора(может создать только модератор)")
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public @ResponseBody ModeratorDto createModerator(@RequestBody ModeratorDto moderatorDto) {
+    public @ResponseBody ModeratorDto createModerator(@RequestBody ModeratorCreateRequest moderatorDto) {
         log.info("Received request to create a new moderator.");
         ModeratorDto createdModerator = moderatorService.createModerator(moderatorDto);
         log.info("Moderator created successfully: {}", createdModerator);
@@ -33,15 +36,26 @@ public class ModeratorController {
     }
 
     @Operation(summary = "Изменение модератора")
-    @PutMapping("/{id}")
+    @PutMapping("/update")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    public @ResponseBody ModeratorDto updateModerator(@PathVariable UUID id, @RequestBody ModeratorDto moderatorDto) {
-        log.info("Received request to update moderator with ID: {}", id);
-        moderatorDto.setId(id);
+    public @ResponseBody ModeratorDto updateModerator( @RequestBody ModeratorUpdateRequest moderatorDto) {
+        log.info("Received request to update moderator ");
         ModeratorDto updatedModerator = moderatorService.updateModerator(moderatorDto);
         log.info("Moderator updated successfully: {}", updatedModerator);
         return updatedModerator;
     }
+
+
+    @Operation(summary = "Изменение статуса isAdmin для модератора (могут использовать только админы)")
+    @PutMapping("/update-status")
+    @ResponseStatus(HttpStatus.ACCEPTED)
+    public @ResponseBody ModeratorDto updateModeratorStatus( @RequestBody ModeratorChangeStatusRequest moderatorDto) {
+        log.info("Received request to update moderator ");
+        ModeratorDto updatedModerator = moderatorService.updateModeratorStatus(moderatorDto);
+        log.info("Moderator updated successfully: {}", updatedModerator);
+        return updatedModerator;
+    }
+
 
     @Operation(summary = "Получить модератора по id")
     @GetMapping("/{id}")

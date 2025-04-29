@@ -9,7 +9,6 @@ import org.platform.enums.FriendshipStatus;
 import org.platform.model.member.MemberDto;
 import org.platform.model.member.MemberRegistrationDto;
 import org.platform.model.verify.VerifyRequest;
-import org.platform.repository.EventMemberRepository;
 import org.platform.repository.FriendRepository;
 import org.platform.repository.MemberRepository;
 import org.platform.repository.OrganizerRepository;
@@ -41,6 +40,7 @@ public class MemberSpringJpa implements MemberService {
     private final FriendRepository friendRepository;
     private final OrganizerRepository organizerRepository;
 
+    @Transactional
     @Override
     public MemberRegistrationDto createMember(MemberRegistrationDto memberDto) {
 
@@ -59,7 +59,7 @@ public class MemberSpringJpa implements MemberService {
             member.setStatus(1);
 
             memberRepository.save(member);
-            sendEmailVerificationCode(member.getEmail());
+            emailService.sendEmailVerificationCode(member.getEmail());
 
             return memberDto;
         } catch (Exception e) {
@@ -172,13 +172,6 @@ public class MemberSpringJpa implements MemberService {
         return dto;
     }
 
-    private boolean areFriends(UUID userId1, UUID userId2) {
-        List<Friend> friends = friendRepository.findByUserId1OrUserId2(userId1, userId1);
-        return friends.stream().anyMatch(f ->
-                f.getStatus() == FriendshipStatus.ACCEPTED &&
-                        (f.getUserId1().equals(userId2) || f.getUserId2().equals(userId2)));
-    }
-
 
     @Override
     public void deleteMember(MemberDto memberDto) {
@@ -190,32 +183,6 @@ public class MemberSpringJpa implements MemberService {
         }
     }
 
-    /**
-     * sending verification token to email
-     */
-    @Transactional
-    @Override
-    public boolean sendEmailVerificationCode(String email) {
-
-        String token = String.format("%05d", new Random().nextInt(100000));
-
-        VerificationToken verificationToken = new VerificationToken();
-        verificationToken.setToken(token);
-        verificationToken.setEmail(email);
-        verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-        try {
-            verificationTokenRepository.save(verificationToken);
-        } catch (Exception e) {
-            throw new RuntimeException("Error storing verification token");
-        }
-        try {
-            emailService.sendVerificationEmail(email, token);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Error sending verification email");
-        }
-
-    }
 
 
     /**
@@ -274,6 +241,12 @@ public class MemberSpringJpa implements MemberService {
 
     }
 
+    private boolean areFriends(UUID userId1, UUID userId2) {
+        List<Friend> friends = friendRepository.findByUserId1OrUserId2(userId1, userId1);
+        return friends.stream().anyMatch(f ->
+                f.getStatus() == FriendshipStatus.ACCEPTED &&
+                        (f.getUserId1().equals(userId2) || f.getUserId2().equals(userId2)));
+    }
 
     private Member getCurrentAuthenticatedMember() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();

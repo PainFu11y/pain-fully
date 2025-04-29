@@ -22,11 +22,10 @@ public interface MemberService {
 
     void deleteMember(MemberDto memberDto);
 
-    boolean sendEmailVerificationCode(String email);
-
     boolean verifyEmailVerificationCode(VerifyRequest verifyRequest);
 
     MemberDto getMemberProfile(UUID memberId);
+
 
 
 }

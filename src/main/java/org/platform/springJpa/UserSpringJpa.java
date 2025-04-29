@@ -2,19 +2,28 @@ package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.platform.entity.Member;
+import org.platform.entity.Organizer;
+import org.platform.entity.verification.VerificationToken;
 import org.platform.model.member.MemberDto;
-import org.platform.model.ModeratorDto;
+import org.platform.model.moderator.ModeratorDto;
 import org.platform.model.organizer.OrganizerDto;
 import org.platform.repository.MemberRepository;
 import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
+import org.platform.repository.verification.VerificationTokenRepository;
 import org.platform.service.UserService;
+import org.platform.service.email.EmailService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -23,6 +32,9 @@ public class UserSpringJpa implements UserService {
     private final MemberRepository memberRepository;
     private final OrganizerRepository organizerRepository;
     private final ModeratorRepository moderatorRepository;
+    private final VerificationTokenRepository verificationTokenRepository;
+    private final EmailService emailService;
+    private final PasswordEncoder passwordEncoder;
 
 
     @Override
@@ -102,4 +114,54 @@ public class UserSpringJpa implements UserService {
             }
         };
     }
+
+    @Transactional
+    @Override
+    public boolean sendPasswordResetCode(String email) {
+        if (!memberRepository.existsByEmail(email)
+                && !organizerRepository.existsByEmail(email)) {
+            throw new IllegalArgumentException("Email  " + email + " не найден");
+        }
+        emailService.sendForgotPasswordCode(email);
+        return false;
+    }
+
+    @Override
+    public boolean resetPassword(String email, String resetCode, String newPassword) {
+        try{
+            Optional<VerificationToken> codeFromDb = verificationTokenRepository.findByEmail(email);
+            if (codeFromDb.isEmpty()) {
+                throw new RuntimeException("Verification token not found with email " + email);
+            }
+            VerificationToken verificationToken = codeFromDb.get();
+            if(!verificationToken.getToken().equals(resetCode)){
+                throw new RuntimeException("Reset code not match");
+            }
+
+            Optional<Member> memberOpt = memberRepository.findByEmail(email);
+            Optional<Organizer> organizerOpt = organizerRepository.findByEmail(email);
+
+            if (memberOpt.isEmpty()) {
+                 if (organizerOpt.isEmpty()) {
+                    throw new RuntimeException("User not found with email " + email);
+                }
+                 Organizer organizer = organizerOpt.get();
+                 organizer.setPassword(passwordEncoder.encode(newPassword));
+                 organizerRepository.save(organizer);
+                 verificationTokenRepository.deleteById(verificationToken.getId());
+             log.info("New password reset successful for organizer");
+             return true;
+            }
+            Member member = memberOpt.get();
+            member.setPassword(passwordEncoder.encode(newPassword));
+            memberRepository.save(member);
+            verificationTokenRepository.deleteById(verificationToken.getId());
+            log.info("New password reset successful for member");
+            return true;
+        }catch (Exception e){
+            log.error("Error occurred during password reset", e);
+            throw e;
+        }
+    }
+
 }

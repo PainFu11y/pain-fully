@@ -92,7 +92,7 @@ public class OrganizerSpringJpa implements OrganizerService {
                 savedOrganizer.setSocialMedias(socialMediaList);
             }
 
-            sendEmailVerificationCodeForOrganizer(savedOrganizer.getEmail());
+            emailService.sendEmailVerificationCode(savedOrganizer.getEmail());
 
             return savedOrganizer.toDto();
 
@@ -269,46 +269,6 @@ public class OrganizerSpringJpa implements OrganizerService {
         Pageable pageable = PageRequest.of(filterRequest.getPage(), filterRequest.getLimit(), Sort.by("startTime").descending());
         return eventRepository.findAll(spec, pageable);
     }
-
-    @Transactional
-    public boolean sendEmailVerificationCodeForOrganizer(String email) {
-
-        String token = String.format("%05d", new Random().nextInt(100000));
-
-        VerificationToken verificationToken = null;
-        Optional<VerificationToken> byEmail;
-        try {
-            byEmail = verificationTokenRepository.findByEmail(email);
-        } catch (Exception e) {
-            throw new RuntimeException("Problem while getting verification by email", e);
-        }
-        if (byEmail.isPresent()) {
-            verificationToken = byEmail.get();
-
-            if (verificationToken.getExpiryDate().minusMinutes(14).isAfter(LocalDateTime.now())) {
-                throw new RuntimeException("Код уже был отправлен недавно. Пожалуйста, подождите.");
-            }
-            verificationToken.setToken(token);
-            verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-        } else {
-            verificationToken = new VerificationToken();
-            verificationToken.setToken(token);
-            verificationToken.setEmail(email);
-            verificationToken.setExpiryDate(LocalDateTime.now().plusMinutes(15));
-        }
-        try {
-            verificationTokenRepository.save(verificationToken);
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка при сохранении токена", e);
-        }
-        try {
-            emailService.sendVerificationEmail(email, token);
-            return true;
-        } catch (Exception e) {
-            throw new RuntimeException("Ошибка при отправке письма", e);
-        }
-    }
-
 
     @Transactional
     @Override

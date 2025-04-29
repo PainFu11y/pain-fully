@@ -1,7 +1,6 @@
 package org.platform.springJpa.organizer;
 
 import lombok.RequiredArgsConstructor;
-import org.platform.entity.Member;
 import org.platform.entity.Moderator;
 import org.platform.entity.Organizer;
 import org.platform.entity.verification.OrganizerVerification;

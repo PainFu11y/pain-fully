@@ -51,6 +51,7 @@ public class WebSecurityConfig implements WebMvcConfigurer {
                         "/auth/token",
                         "/api/v1/member/create",
                         "/api/v1/member/verify-email",
+                        "/api/v1/user/forgot-password",
                         "/api/v1/organizer/create",
                         "/api/*/*/openapi/**",
                         "/api/v1/**"

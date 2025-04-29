@@ -2,14 +2,15 @@ package org.platform.springJpa;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.platform.entity.Member;
 import org.platform.entity.Moderator;
 import org.platform.entity.Organizer;
 import org.platform.entity.event.Event;
 import org.platform.entity.verification.OrganizerVerification;
 import org.platform.enums.OrganizersVerifyStatus;
-import org.platform.enums.event.EventStatus;
-import org.platform.model.ModeratorDto;
+import org.platform.model.moderator.ModeratorChangeStatusRequest;
+import org.platform.model.moderator.ModeratorCreateRequest;
+import org.platform.model.moderator.ModeratorDto;
+import org.platform.model.moderator.ModeratorUpdateRequest;
 import org.platform.repository.EventRepository;
 import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
@@ -17,9 +18,9 @@ import org.platform.repository.OrganizerVerificationRepository;
 import org.platform.service.ModeratorService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.List;
 import java.util.Optional;
@@ -33,18 +34,20 @@ public class ModeratorSpringJpa implements ModeratorService {
     private final OrganizerRepository organizerRepository;
     private final OrganizerVerificationRepository organizerVerificationRepository;
     private final EventRepository eventRepository;
+
     @Override
-    public ModeratorDto createModerator(ModeratorDto moderatorDto) {
+    public ModeratorDto createModerator(ModeratorCreateRequest request) {
+        getCurrentModerator();
         try {
-            Optional<Moderator> existing = moderatorRepository.findByUsername(moderatorDto.getUsername());
+            Optional<Moderator> existing = moderatorRepository.findByUsername(request.getUsername());
             if (existing.isPresent()) {
-                throw new IllegalArgumentException("Moderator with username '" + moderatorDto.getUsername() + "' already exists");
+                throw new IllegalArgumentException("Moderator with username '" + request.getUsername() + "' already exists");
             }
 
             Moderator moderator = Moderator.builder()
-                    .username(moderatorDto.getUsername())
-                    .password(moderatorDto.getPassword())
-                    .isAdmin(moderatorDto.isAdmin())
+                    .username(request.getUsername())
+                    .password(request.getPassword())
+                    .isAdmin(request.isAdmin())
                     .build();
 
             Moderator saved = moderatorRepository.save(moderator);
@@ -60,14 +63,14 @@ public class ModeratorSpringJpa implements ModeratorService {
     }
 
     @Override
-    public ModeratorDto updateModerator(ModeratorDto moderatorDto) {
+    public ModeratorDto updateModerator(ModeratorUpdateRequest request) {
         try {
-            Moderator existingModerator = moderatorRepository.findById(moderatorDto.getId())
+            Moderator currentModerator = getCurrentModerator();
+            Moderator existingModerator = moderatorRepository.findByUsername(currentModerator.getUsername())
                     .orElseThrow(() -> new RuntimeException("Moderator not found"));
 
-            existingModerator.setUsername(moderatorDto.getUsername());
-            existingModerator.setPassword(moderatorDto.getPassword());
-            existingModerator.setAdmin(moderatorDto.isAdmin());
+            existingModerator.setUsername(request.getUsername());
+            existingModerator.setPassword(request.getPassword());
 
             Moderator saved = moderatorRepository.save(existingModerator);
 
@@ -81,6 +84,34 @@ public class ModeratorSpringJpa implements ModeratorService {
             throw new RuntimeException("Could not update moderator", e);
         }
     }
+
+    @Override
+    public ModeratorDto updateModeratorStatus( @RequestBody ModeratorChangeStatusRequest request) {
+        try {
+            Moderator currentModerator = getCurrentModerator();
+            if(!currentModerator.isAdmin()){
+                throw new IllegalArgumentException("Moderator is not admin");
+            }
+
+            Moderator existingModerator = moderatorRepository.findById(request.getModeratorId())
+                    .orElseThrow(() -> new RuntimeException("Moderator not found with given id"));
+
+            existingModerator.setAdmin(request.isAdmin());
+
+            Moderator saved = moderatorRepository.save(existingModerator);
+
+            return ModeratorDto.builder()
+                    .id(saved.getId())
+                    .username(saved.getUsername())
+                    .password(saved.getPassword())
+                    .isAdmin(saved.isAdmin())
+                    .build();
+        } catch (Exception e) {
+            throw new RuntimeException("Could not update moderator", e);
+        }
+    }
+
+
 
     @Override
     public ModeratorDto getModeratorById(UUID id) {
@@ -147,14 +178,12 @@ public class ModeratorSpringJpa implements ModeratorService {
     @Override
     public boolean changeVerifyStatusForOrganizer(String organizerEmail, OrganizersVerifyStatus verifyStatus) {
         try {
-            // Получение текущего пользователя из JWT через Spring Security
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
                 log.warn("Unauthenticated request attempted to change verification status");
                 throw new RuntimeException("Unauthorized");
             }
 
-            // Проверка, что роль пользователя — MODERATOR
             boolean hasModeratorRole = authentication.getAuthorities().stream()
                     .anyMatch(auth -> auth.getAuthority().equals("ROLE_MODERATOR"));
 
@@ -193,7 +222,7 @@ public class ModeratorSpringJpa implements ModeratorService {
 
     @Override
     public boolean changeVerifyStatusForEvent(UUID eventId, int moderationStatus, String moderationStatusMessage) {
-        try{
+        try {
             // Получение текущего пользователя из JWT через Spring Security
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
@@ -228,21 +257,10 @@ public class ModeratorSpringJpa implements ModeratorService {
             log.info("Moderation status for event id {} changed to {} with message {}",
                     eventId, moderationStatus, moderationStatusMessage);
             return true;
-        }catch (Exception e) {
+        } catch (Exception e) {
             log.error("Error while changing verification status for event {}", eventId, e);
             throw new RuntimeException("Error while changing verification status for event " + eventId, e);
         }
-    }
-
-    /**
-     * Получение пользователя по имени пользователя
-     * <p>
-     * Нужен для Spring Security
-     *
-     * @return пользователь
-     */
-    public UserDetailsService userDetailsService() {
-        return this::getByUsername;
     }
 
     /**
@@ -250,14 +268,13 @@ public class ModeratorSpringJpa implements ModeratorService {
      *
      * @return текущий пользователь
      */
-    public Moderator getCurrentUser() {
+    private Moderator getCurrentModerator() {
         var username = SecurityContextHolder.getContext().getAuthentication().getName();
-        return getByUsername(username);
+        return getByModeratorName(username);
     }
 
-    public Moderator getByUsername(String username) {
-        return moderatorRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-
+    private Moderator getByModeratorName(String moderatorName) {
+        return moderatorRepository.findByUsername(moderatorName)
+                .orElseThrow(() -> new UsernameNotFoundException("Модератор с именем " + moderatorName +  " не найден"));
     }
 }

@@ -26,7 +26,6 @@ public interface OrganizerService {
     List<EventDto> getMyEvents();
     Page<Event> filterMyEvents(EventFilterRequest filterRequest);
 
-    boolean sendEmailVerificationCodeForOrganizer(String email);
     boolean verifyEmailVerificationCodeForOrganizer(VerifyRequest verifyRequest);
 
 }

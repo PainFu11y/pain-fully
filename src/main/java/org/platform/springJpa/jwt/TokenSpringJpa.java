@@ -12,6 +12,7 @@ import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
 import org.platform.service.MemberService;
 import org.platform.service.OrganizerService;
+import org.platform.service.email.EmailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,7 +36,7 @@ public class TokenSpringJpa {
     @Autowired
     private ModeratorRepository moderatorRepository;
     @Autowired
-    private MemberService memberService;
+    private EmailService emailService;
     @Autowired
     private OrganizerService organizerService;
 
@@ -47,35 +48,35 @@ public class TokenSpringJpa {
                     .authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(), loginRequest.getPassword()));
 
             String email = authenticate.getName();
-            if(loginRequest.getRole().equals(Role.MEMBER)) {
+            if (loginRequest.getRole().equals(Role.MEMBER)) {
                 Optional<Member> member = memberRepository.findByEmail(email);
-                if(member.isPresent()) {
+                if (member.isPresent()) {
                     loginRequest.setPassword("");
-                    if(member.get().isEmailVerified()){
+                    if (member.get().isEmailVerified()) {
                         token = jwtUtil.createToken(loginRequest);
-                    }else{
-                       memberService.sendEmailVerificationCode(email);
-                       token = "Your email verification code has been sent to your account.";
+                    } else {
+                        emailService.sendEmailVerificationCode(email);
+                        token = "Your email verification code has been sent to your account.";
                     }
 
-                }else{
+                } else {
                     throw new BadCredentialsException("Invalid username or password");
                 }
-            }else if(loginRequest.getRole().equals(Role.ORGANIZER)) {
+            } else if (loginRequest.getRole().equals(Role.ORGANIZER)) {
                 Optional<Organizer> organizer = organizerRepository.findByEmail(email);
-                if(organizer.isPresent()) {
+                if (organizer.isPresent()) {
                     loginRequest.setPassword("");
-                    if(organizer.get().isEmailVerified()){
+                    if (organizer.get().isEmailVerified()) {
                         token = jwtUtil.createToken(loginRequest);
-                    }else {
-                        organizerService.sendEmailVerificationCodeForOrganizer(email);
+                    } else {
+                         emailService.sendEmailVerificationCode(email);
                         token = "Your email verification code has been sent to your account.";
                     }
 
                 }
             } else if (loginRequest.getRole().equals(Role.MODERATOR)) {
                 Optional<Moderator> moderator = moderatorRepository.findByUsername(email);
-                if(moderator.isPresent()) {
+                if (moderator.isPresent()) {
                     loginRequest.setPassword("");
                     token = jwtUtil.createToken(loginRequest);
                 }

@@ -22,3 +22,4 @@ public class AuthController {
         return tokenService.getToken(loginRequest);
     }
 }
+
