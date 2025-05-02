@@ -46,7 +46,7 @@ public class ModeratorController {
     }
 
 
-    @Operation(summary = "Изменение статуса isAdmin для модератора (могут использовать только админы)")
+    @Operation(summary = "Изменение статуса isAdmin для модератора (могут использовать только админыпше)")
     @PutMapping("/update-status")
     @ResponseStatus(HttpStatus.ACCEPTED)
     public @ResponseBody ModeratorDto updateModeratorStatus( @RequestBody ModeratorChangeStatusRequest moderatorDto) {
