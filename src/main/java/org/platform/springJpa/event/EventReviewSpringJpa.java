@@ -2,7 +2,6 @@ package org.platform.springJpa.event;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.hibernate.validator.internal.constraintvalidators.bv.time.futureorpresent.FutureOrPresentValidatorForReadableInstant;
 import org.platform.entity.Member;
 import org.platform.entity.Moderator;
 import org.platform.entity.event.Event;
@@ -32,7 +31,6 @@ public class EventReviewSpringJpa implements EventReviewService {
     private final EventRepository eventRepository;
     private final MemberRepository memberRepository;
     private final EventReviewRepository eventReviewRepository;
-    private final FutureOrPresentValidatorForReadableInstant futureOrPresentValidatorForReadableInstant;
     private final ModeratorRepository moderatorRepository;
     private final EventMemberRepository eventMemberRepository;
 
