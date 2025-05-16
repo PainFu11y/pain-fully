@@ -40,10 +40,8 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // Для работы с JSON через Jackson
 
-    //Twilio 2FA
-    implementation 'com.vonage:client:7.2.0'
-
-
+    //Github
+    implementation 'io.github.cdimascio:dotenv-java:3.0.0'
 
 
     //JUnit
