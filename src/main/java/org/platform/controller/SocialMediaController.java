@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
@@ -18,6 +19,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.SOCIAL_MEDIA)
 @RequiredArgsConstructor
+@Tag(name = "Социальные сети", description = "Управление записями социальных сетей для организаторов")
 public class SocialMediaController {
 
     private final SocialMediaService socialMediaService;

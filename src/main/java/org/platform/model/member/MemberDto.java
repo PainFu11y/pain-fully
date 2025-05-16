@@ -19,4 +19,7 @@ public class MemberDto {
     private boolean isEmailVerified;
     private int privacy;
     private int status;
+    private String location;
+    private Double latitude;
+    private Double longitude;
 }

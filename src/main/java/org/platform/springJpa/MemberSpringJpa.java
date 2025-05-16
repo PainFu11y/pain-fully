@@ -57,6 +57,9 @@ public class MemberSpringJpa implements MemberService {
             member.setEmailVerified(false);
             member.setPrivacy(0);
             member.setStatus(1);
+            member.setLocation("Ереван");//default
+            member.setLatitude(40.1792);
+            member.setLongitude(44.4991);
 
             memberRepository.save(member);
             emailService.sendEmailVerificationCode(member.getEmail());
@@ -80,6 +83,7 @@ public class MemberSpringJpa implements MemberService {
                 existingMember.setEmailVerified(memberDto.isEmailVerified());
                 existingMember.setPrivacy(memberDto.getPrivacy());
                 existingMember.setStatus(memberDto.getStatus());
+                existingMember.setLocation(memberDto.getLocation());
 
                 memberRepository.save(existingMember);
                 return memberDto;
@@ -188,6 +192,7 @@ public class MemberSpringJpa implements MemberService {
     /**
      * verifying verification token
      */
+    @Transactional
     public boolean verifyEmailVerificationCode(VerifyRequest verifyRequest) {
         String currentEmail = verifyRequest.getEmail();
         String code = verifyRequest.getCode();
@@ -223,23 +228,14 @@ public class MemberSpringJpa implements MemberService {
     }
 
 
-    /**
-     * Получение пользователя по имени пользователя
-     * <p>
-     * Нужен для Spring Security
-     *
-     * @return пользователь
-     */
-    public UserDetailsService userDetailsService() {
-        return this::getByUsername;
+    public boolean updateLocation(String newLocation){
+        Member currentAuthenticatedMember = getCurrentAuthenticatedMember();
+        currentAuthenticatedMember.setLocation(newLocation);
+        memberRepository.save(currentAuthenticatedMember);
+        return true;
     }
 
 
-    public Member getByUsername(String username) {
-        return memberRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException("Пользователь не найден"));
-
-    }
 
     private boolean areFriends(UUID userId1, UUID userId2) {
         List<Friend> friends = friendRepository.findByUserId1OrUserId2(userId1, userId1);

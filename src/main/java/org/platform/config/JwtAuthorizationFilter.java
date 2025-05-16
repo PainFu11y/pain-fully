@@ -45,11 +45,17 @@ public class JwtAuthorizationFilter extends OncePerRequestFilter{
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
         try {
+            if (request.getServletPath().startsWith("/login/oauth2") || request.getServletPath().startsWith("/oauth2")) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
             String accessToken = jwtUtil.resolveToken(request);
             if (accessToken == null) {
                 filterChain.doFilter(request, response);
                 return;
             }
+
             Claims claims = jwtUtil.resolveClaims(request);
 
             if (claims != null && jwtUtil.validateClaims(claims)) {

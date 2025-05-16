@@ -18,6 +18,8 @@ public interface EventService {
 
     EventDto getEventById(UUID id);
 
+    EventDto getPublicEvent(UUID id);
+
     EventDto updateEvent(UUID id,EventDto updatedEventDto);
 
     void deleteEvent(UUID id);
@@ -30,6 +32,7 @@ public interface EventService {
     ResponseEntity<List<EventDto>> searchEvents(EventFilterRequest filter);
 
     Long getCountOfEventsForOrganizer();
+
 
 
 }

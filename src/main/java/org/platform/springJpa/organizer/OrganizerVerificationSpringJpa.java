@@ -9,7 +9,7 @@ import org.platform.model.organizer.OrganizerVerificationDto;
 import org.platform.repository.ModeratorRepository;
 import org.platform.repository.OrganizerRepository;
 import org.platform.repository.OrganizerVerificationRepository;
-import org.platform.service.OrganizerVerificationService;
+import org.platform.service.organizer.OrganizerVerificationService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;

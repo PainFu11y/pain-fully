@@ -1,8 +1,11 @@
 package org.platform.config;
 
 
-import org.platform.security.ThreadContextInterceptor;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
+import org.platform.repository.MemberRepository;
+import org.platform.repository.OrganizerRepository;
+import org.platform.security.OAuth2SuccessHandler;
+import org.platform.springJpa.auth.CustomOAuth2UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,25 +14,27 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
-import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
 @Configuration
 @EnableWebSecurity
+@RequiredArgsConstructor
 public class WebSecurityConfig implements WebMvcConfigurer {
 
-    @Autowired
-    private CustomUserDetailsService customUserDetailsService;
-    @Autowired
-    private PasswordEncoder passwordEncoder;
-    @Autowired
-    private JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomUserDetailsService customUserDetailsService;
+    private final PasswordEncoder passwordEncoder;
+    private final JwtAuthorizationFilter jwtAuthorizationFilter;
+    private final MemberRepository memberRepository;
+    private final OrganizerRepository organizerRepository;
+    private final JwtUtil jwtUtil;
 
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity security) throws Exception {
@@ -46,23 +51,34 @@ public class WebSecurityConfig implements WebMvcConfigurer {
         security.csrf().disable()
                 .cors()
                 .and()
-                .authorizeRequests()
-                .requestMatchers(
-                        "/auth/token",
-                        "/api/v1/member/create",
-                        "/api/v1/member/verify-email",
-                        "/api/v1/user/forgot-password",
-                        "/api/v1/organizer/create",
-                        "/api/*/*/openapi/**",
-                        "/api/v1/**"
-
+                .authorizeHttpRequests(authz -> authz
+                        .requestMatchers(
+                                "/auth/token",
+                                "/auth/verify-2fa",
+                                "/api/v1/member/create",
+                                "/api/v1/member/verify-email",
+                                "/api/v1/user/forgot-password",
+                                "/api/v1/organizer/create",
+                                "/api/*/*/openapi/**",
+                                "/api/v1/**",
+                                "/oauth2/**",
+                                "/login/**",
+                                "/api/2fa/**",
+                                "/api/v1/event/public/*"
+                        ).permitAll()
+                        .anyRequest().authenticated()
                 )
-                .permitAll()
-                .anyRequest()
-                .authenticated()
-                .and().addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2SuccessHandler())
+                )
+                .addFilterBefore(jwtAuthorizationFilter, UsernamePasswordAuthenticationFilter.class);
+
         return security.build();
     }
+
 
     @Bean
     public CorsFilter corsFilter() {
@@ -79,8 +95,10 @@ public class WebSecurityConfig implements WebMvcConfigurer {
     }
 
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new ThreadContextInterceptor());
+    @Bean
+    public AuthenticationSuccessHandler oAuth2SuccessHandler() {
+        return new OAuth2SuccessHandler(memberRepository, organizerRepository, jwtUtil);
     }
+
+
 }

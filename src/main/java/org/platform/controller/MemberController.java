@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
@@ -10,6 +11,8 @@ import org.platform.model.verify.VerifyRequest;
 import org.platform.service.MemberService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -19,6 +22,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.MEMBER)
 @RequiredArgsConstructor
+@Tag(name = "Пользователи (Member)", description = "Управление участниками платформы")
 public class MemberController {
 
     private final MemberService memberService;
@@ -110,9 +114,25 @@ public class MemberController {
         }else {
             return ResponseEntity.ok("Verification code not verified");
         }
-
     }
 
 
+    @Operation(summary = "OAuth2 Dashboard: приветственное сообщение")
+    @GetMapping("/dashboard")
+    public ResponseEntity<String> dashboard(@AuthenticationPrincipal OAuth2User oauthUser) {
+        String name = oauthUser.getAttribute("name");
+        String email = oauthUser.getAttribute("email");
+        return ResponseEntity.ok("👤 Member Dashboard\nДобро пожаловать, " + name + " (" + email + ")");
+    }
+
+
+    @PatchMapping("/location")
+    public ResponseEntity<String> updateLocation(@RequestParam String locationRequest) {
+        if(memberService.updateLocation(locationRequest)){
+            return ResponseEntity.ok("Location updated successfully");
+        }else {
+            return ResponseEntity.ok("Problem while updating location ");
+        }
+    }
 
 }

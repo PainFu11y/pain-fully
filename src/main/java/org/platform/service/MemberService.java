@@ -26,6 +26,8 @@ public interface MemberService {
 
     MemberDto getMemberProfile(UUID memberId);
 
+    boolean updateLocation(String newLocation);
+
 
 
 }

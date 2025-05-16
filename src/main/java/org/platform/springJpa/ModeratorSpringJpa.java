@@ -1,9 +1,12 @@
 package org.platform.springJpa;
 
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.platform.entity.Member;
 import org.platform.entity.Moderator;
 import org.platform.entity.Organizer;
+import org.platform.entity.OrganizerSubscription;
 import org.platform.entity.event.Event;
 import org.platform.entity.verification.OrganizerVerification;
 import org.platform.enums.OrganizersVerifyStatus;
@@ -11,11 +14,10 @@ import org.platform.model.moderator.ModeratorChangeStatusRequest;
 import org.platform.model.moderator.ModeratorCreateRequest;
 import org.platform.model.moderator.ModeratorDto;
 import org.platform.model.moderator.ModeratorUpdateRequest;
-import org.platform.repository.EventRepository;
-import org.platform.repository.ModeratorRepository;
-import org.platform.repository.OrganizerRepository;
-import org.platform.repository.OrganizerVerificationRepository;
+import org.platform.repository.*;
+import org.platform.repository.event.EventRepository;
 import org.platform.service.ModeratorService;
+import org.platform.service.email.EmailService;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -26,6 +28,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
+import static java.util.Arrays.stream;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -34,6 +38,8 @@ public class ModeratorSpringJpa implements ModeratorService {
     private final OrganizerRepository organizerRepository;
     private final OrganizerVerificationRepository organizerVerificationRepository;
     private final EventRepository eventRepository;
+    private final EmailService emailService;
+    private final OrganizerSubscriptionRepository organizerSubscriptionRepository;
 
     @Override
     public ModeratorDto createModerator(ModeratorCreateRequest request) {
@@ -86,10 +92,10 @@ public class ModeratorSpringJpa implements ModeratorService {
     }
 
     @Override
-    public ModeratorDto updateModeratorStatus( @RequestBody ModeratorChangeStatusRequest request) {
+    public ModeratorDto updateModeratorStatus(@RequestBody ModeratorChangeStatusRequest request) {
         try {
             Moderator currentModerator = getCurrentModerator();
-            if(!currentModerator.isAdmin()){
+            if (!currentModerator.isAdmin()) {
                 throw new IllegalArgumentException("Moderator is not admin");
             }
 
@@ -110,7 +116,6 @@ public class ModeratorSpringJpa implements ModeratorService {
             throw new RuntimeException("Could not update moderator", e);
         }
     }
-
 
 
     @Override
@@ -221,47 +226,57 @@ public class ModeratorSpringJpa implements ModeratorService {
     }
 
     @Override
+    @Transactional
     public boolean changeVerifyStatusForEvent(UUID eventId, int moderationStatus, String moderationStatusMessage) {
         try {
-            // Получение текущего пользователя из JWT через Spring Security
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
             if (authentication == null || !authentication.isAuthenticated()) {
                 log.warn("Unauthenticated request attempted to change verification status");
                 throw new RuntimeException("Unauthorized");
             }
 
-            // Проверка, что роль пользователя — MODERATOR
+
             boolean hasModeratorRole = authentication.getAuthorities().stream()
                     .anyMatch(auth -> auth.getAuthority().equals("ROLE_MODERATOR"));
-
             if (!hasModeratorRole) {
                 log.warn("User {} tried to change verification status without MODERATOR role", authentication.getName());
                 throw new RuntimeException("Forbidden: You do not have moderator permissions");
             }
 
-            Event byId = eventRepository.findById(eventId)
+
+            Event event = eventRepository.findById(eventId)
                     .orElseThrow(() -> {
                         log.warn("Event with id {} not found", eventId);
                         return new RuntimeException("Event with id " + eventId + " not found");
                     });
 
-            if (byId.getModerationStatus() == moderationStatus) {
-                log.info("Event moderation status for event by id {} is already {}", eventId, moderationStatus);
+
+            if (event.getModerationStatus() == moderationStatus) {
+                log.info("Event moderation status for event id {} is already {}", eventId, moderationStatus);
                 return false;
             }
 
-            byId.setModerationStatus(moderationStatus);
-            byId.setModerationStatusInfo(moderationStatusMessage);
-            eventRepository.save(byId);
+
+            event.setModerationStatus(moderationStatus);
+            event.setModerationStatusInfo(moderationStatusMessage);
+            eventRepository.save(event);
+
+
+            final int APPROVED_STATUS = 1;
+            if (moderationStatus == APPROVED_STATUS) {
+                notifySubscribersAboutNewEvent(event);
+            }
 
             log.info("Moderation status for event id {} changed to {} with message {}",
                     eventId, moderationStatus, moderationStatusMessage);
             return true;
+
         } catch (Exception e) {
             log.error("Error while changing verification status for event {}", eventId, e);
             throw new RuntimeException("Error while changing verification status for event " + eventId, e);
         }
     }
+
 
     /**
      * Получение текущего пользователя
@@ -275,6 +290,36 @@ public class ModeratorSpringJpa implements ModeratorService {
 
     private Moderator getByModeratorName(String moderatorName) {
         return moderatorRepository.findByUsername(moderatorName)
-                .orElseThrow(() -> new UsernameNotFoundException("Модератор с именем " + moderatorName +  " не найден"));
+                .orElseThrow(() -> new UsernameNotFoundException("Модератор с именем " + moderatorName + " не найден"));
     }
+
+    private void notifySubscribersAboutNewEvent(Event event) {
+        Organizer organizer = event.getOrganizer();
+        if (organizer == null) {
+            log.warn("Organizer is null for event {}", event.getId());
+            return;
+        }
+
+        List<Member> subscribers = organizerSubscriptionRepository
+                .findByOrganizer(organizer)
+                .stream()
+                .map(OrganizerSubscription::getMember)
+                .filter(member -> member.getEmail() != null && member.isEmailVerified())
+                .toList();
+
+        for (Member member : subscribers) {
+            try {
+                emailService.sendNewEvent(
+                        member.getEmail(),
+                        event.toDto(),
+                        member.toDto()
+                );
+                log.info("Уведомление отправлено подписчику {} о новом мероприятии от {}",
+                        member.getEmail(), organizer.getOrganizationName());
+            } catch (Exception ex) {
+                log.warn("Не удалось отправить письмо подписчику {}: {}", member.getEmail(), ex.getMessage());
+            }
+        }
+    }
+
 }

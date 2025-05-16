@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.platform.entity.FavouriteTag;
 import org.platform.model.FavouriteTagDto;
@@ -15,6 +16,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/favourite-tags")
 @RequiredArgsConstructor
+@Tag(name = "Избранные теги", description = "Управление любимыми тегами участника (только для MEMBER)")
 public class FavouriteTagController {
 
     private final FavouriteTagService favouriteTagService;

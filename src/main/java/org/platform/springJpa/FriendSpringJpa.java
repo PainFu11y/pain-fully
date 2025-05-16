@@ -7,7 +7,7 @@ import org.platform.entity.Member;
 import org.platform.entity.event.Event;
 import org.platform.enums.FriendshipStatus;
 import org.platform.model.FriendDto;
-import org.platform.repository.EventRepository;
+import org.platform.repository.event.EventRepository;
 import org.platform.repository.FriendRepository;
 import org.platform.repository.MemberRepository;
 import org.platform.service.FriendService;

@@ -7,7 +7,10 @@ CREATE TABLE members
     password          VARCHAR(255)        NOT NULL,
     is_email_verified BOOLEAN             NOT NULL,
     privacy           INT                 NOT NULL,
-    status            INT
+    status            INT,
+    location          VARCHAR(255),
+    latitude          DECIMAL(10, 6),
+    longitude         DECIMAL(10, 6)
 );
 
 -- 2. Moderators
@@ -76,7 +79,8 @@ CREATE TABLE events
     contact_info      TEXT                            NOT NULL,
     moderation_status INT,
     status_info       TEXT,
-    image             TEXT
+    image             TEXT,
+    public_id         UUID                            NOT NULL
 );
 
 -- 8. Event Tags
@@ -96,7 +100,7 @@ CREATE TABLE event_tag_association
 );
 
 -- 10. Event Members
-CREATE TABLE event_members
+CREATE TABLE events_members
 (
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     event_id  UUID NOT NULL REFERENCES events (id) ON DELETE CASCADE,
@@ -130,7 +134,7 @@ CREATE TABLE favourite_tags
 (
     id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
     member_id UUID NOT NULL,
-    tag_id     UUID NOT NULL,
+    tag_id    UUID NOT NULL,
     FOREIGN KEY (member_id) REFERENCES members (id),
     FOREIGN KEY (tag_id) REFERENCES event_tags (id),
     UNIQUE (member_id, tag_id)
@@ -151,6 +155,44 @@ CREATE TABLE verification_token
     email       VARCHAR(255),
     expiry_date TIMESTAMP
 );
+
+
+CREATE TABLE organizer_subscriptions
+(
+    id            UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id     UUID NOT NULL REFERENCES members (id) ON DELETE CASCADE,
+    organizer_id  UUID NOT NULL REFERENCES organizers (id) ON DELETE CASCADE,
+    subscribed_at TIMESTAMP        DEFAULT now(),
+    UNIQUE (member_id, organizer_id)
+);
+
+
+CREATE TABLE event_reviews
+(
+    id         UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+
+    author_id  UUID    NOT NULL REFERENCES members (id) ON DELETE CASCADE,
+    event_id   UUID    NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+
+    rating     INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+    comment    VARCHAR(1000),
+
+    created_at TIMESTAMP,
+    updated_at TIMESTAMP,
+
+    UNIQUE (author_id, event_id)
+);
+
+CREATE TABLE favorite_events
+(
+    id        UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+    member_id UUID NOT NULL REFERENCES members (id) ON DELETE CASCADE,
+    event_id  UUID NOT NULL REFERENCES events (id) ON DELETE CASCADE,
+    UNIQUE (member_id, event_id)
+);
+
+
+
 
 
 

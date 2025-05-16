@@ -1,5 +1,6 @@
 package org.platform.entity.verification;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -26,6 +27,7 @@ public class OrganizerVerification {
 
     @OneToOne
     @JoinColumn(name = "organizer_id", nullable = false, unique = true)
+    @JsonIgnore
     private Organizer organizer;
 
     @Enumerated(EnumType.STRING)

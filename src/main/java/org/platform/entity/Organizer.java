@@ -1,5 +1,6 @@
 package org.platform.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -61,6 +62,7 @@ public class Organizer implements UserDetails {
     private String sphereOfActivity;
 
     @OneToMany(mappedBy = "organizer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonIgnore
     private List<Event> events;
 
 

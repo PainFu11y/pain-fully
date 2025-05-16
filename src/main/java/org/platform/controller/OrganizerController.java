@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.entity.event.Event;
@@ -14,11 +15,13 @@ import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
 import org.platform.model.response.PaginatedResponse;
 import org.platform.model.verify.VerifyRequest;
-import org.platform.service.OrganizerService;
+import org.platform.service.organizer.OrganizerService;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -30,6 +33,7 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.ORGANIZER)
 @RequiredArgsConstructor
+@Tag(name = "Организаторы (Organizers)", description = "Управление аккаунтами организаторов и их мероприятиями")
 public class OrganizerController {
 
     private final OrganizerService organizerService;
@@ -150,7 +154,7 @@ public class OrganizerController {
     @PostMapping("/verify-email")
     public ResponseEntity<String> verifyEmail(@RequestBody VerifyRequest verifyRequest) {
         try {
-            boolean verified = organizerService.verifyEmailVerificationCodeForOrganizer(verifyRequest);
+            boolean verified = organizerService.verifyEmailVerificationCode(verifyRequest);
             if (verified) {
                 return ResponseEntity.ok("Email успешно подтвержден.");
             } else {
@@ -162,5 +166,12 @@ public class OrganizerController {
         }
     }
 
+
+    @GetMapping("/dashboard")
+    public ResponseEntity<String> dashboard(@AuthenticationPrincipal OAuth2User oauthUser) {
+        String name = oauthUser.getAttribute("name");
+        String email = oauthUser.getAttribute("email");
+        return ResponseEntity.ok("🏢 Organizer Dashboard\nДобро пожаловать, " + name + " (" + email + ")");
+    }
 
 }

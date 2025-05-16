@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.FriendshipStatus;
@@ -17,6 +18,7 @@ import java.util.UUID;
 @RestController
 @RequestMapping(name = RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.FRIEND)
 @RequiredArgsConstructor
+@Tag(name = "Друзья", description = "Управление друзьями: заявки, блокировки, приглашения на события")
 public class FriendController {
     private final FriendService friendService;
 

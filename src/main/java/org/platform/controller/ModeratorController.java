@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.OrganizersVerifyStatus;
@@ -21,6 +22,7 @@ import java.util.UUID;
 @RequestMapping(RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.MODERATOR)
 @RequiredArgsConstructor
 @Slf4j
+@Tag(name = "Модераторы (Moderators)", description = "Управление аккаунтами модераторов и верификацией")
 public class ModeratorController {
 
     private final ModeratorService moderatorService;

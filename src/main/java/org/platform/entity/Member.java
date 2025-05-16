@@ -41,6 +41,14 @@ public class Member implements UserDetails {
     private int privacy;//0-public,1-only friends, 2-no one
     private int status; //0-active,1-blocked
 
+    @Column(name = "location")
+    private String location;
+    @Column(name = "latitude")
+    private Double latitude;
+    @Column(name = "longitude")
+    private Double longitude;
+
+
     @Transient
     private List<GrantedAuthority> authorities = new ArrayList<>();
 
@@ -54,6 +62,9 @@ public class Member implements UserDetails {
         memberDto.setEmailVerified(isEmailVerified);
         memberDto.setPrivacy(privacy);
         memberDto.setStatus(status);
+        memberDto.setLocation(location);
+        memberDto.setLatitude(latitude);
+        memberDto.setLongitude(longitude);
         return memberDto;
     }
     public static Member fromDto(MemberDto memberDto){
@@ -65,6 +76,9 @@ public class Member implements UserDetails {
         member.setEmailVerified(memberDto.isEmailVerified());
         member.setPrivacy(memberDto.getPrivacy());
         member.setStatus(memberDto.getStatus());
+        member.setLocation(memberDto.getLocation());
+        member.setLatitude(memberDto.getLatitude());
+        member.setLongitude(memberDto.getLongitude());
         return member;
     }
 

@@ -1,6 +1,7 @@
 package org.platform.model.request;
 
 import io.swagger.v3.oas.annotations.media.Schema;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import org.platform.enums.Role;
@@ -8,6 +9,7 @@ import org.platform.enums.Role;
 @Data
 @Schema(description = "Запрос на аутентификацию")
 @Builder
+@AllArgsConstructor
 public class LoginRequest {
 
     @Schema(description = "mail пользователя", example = "333vahe777@gmail.com")
@@ -18,4 +20,7 @@ public class LoginRequest {
 
     @Schema(description = "Тип пользователя", example = "MEMBER")
     private Role role;
+
+    public LoginRequest() {
+    }
 }

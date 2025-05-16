@@ -1,5 +1,6 @@
 package org.platform.entity.event;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
@@ -35,6 +36,7 @@ public class Event {
     private String description;
     @ManyToOne
     @JoinColumn(name = "organizer_id", nullable = false)
+    @JsonIgnore
     private Organizer organizer;
     @Enumerated(EnumType.STRING)
     private EventFormat format; //ONLINE, OFFLINE
@@ -73,6 +75,8 @@ public class Event {
     @Column(length = 65535, columnDefinition = "TEXT")
     private String image;
 
+   @Column(name = "public_id", unique = true, nullable = false)
+   private UUID publicId = UUID.randomUUID();
 
     public  EventDto toDto(){
         EventDto eventDto = new EventDto();

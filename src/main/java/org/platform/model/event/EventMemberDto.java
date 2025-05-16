@@ -18,7 +18,6 @@ import java.util.UUID;
 public class EventMemberDto {
     private UUID id;
     private EventDto event;
-    @JsonProperty("members")
-    private List<MemberDto> memberList;
+    private MemberDto member;
     private ParticipantStatus status;
 }

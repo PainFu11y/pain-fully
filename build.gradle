@@ -23,6 +23,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-security'
     implementation 'org.springframework.boot:spring-boot-starter-mail'
+    implementation 'org.springframework.boot:spring-boot-starter-oauth2-client'
     implementation group: 'org.springframework.data', name: 'spring-data-rest-core', version: '4.3.2'
 
     //db
@@ -39,13 +40,18 @@ dependencies {
     runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
     runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5' // Для работы с JSON через Jackson
 
+    //Twilio 2FA
+    implementation 'com.vonage:client:7.2.0'
+
+
+
+
     //JUnit
-    dependencies {
-        testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
-        testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
-        testImplementation 'org.mockito:mockito-core:5.3.0'
-        testImplementation 'org.mockito:mockito-junit-jupiter:5.3.0'
-    }
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.9.3'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.9.3'
+    testImplementation 'org.mockito:mockito-core:5.3.0'
+    testImplementation 'org.mockito:mockito-junit-jupiter:5.3.0'
+
 
 }
 

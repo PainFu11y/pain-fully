@@ -45,7 +45,7 @@ VALUES
 INSERT INTO events (
     id, title, description, organizer_id, format, location, event_category_id,
     latitude, longitude, start_time, end_time, contact_info,
-    moderation_status, status_info, image
+    moderation_status, status_info, image, public_id
 ) VALUES
       (
           'e1e1e1e1-e1e1-e1e1-e1e1-e1e1e1e1e1e1',
@@ -61,7 +61,8 @@ INSERT INTO events (
           'contact@festival.am',
           1,
           'Событие подтверждено',
-          'https://example.com/image1.jpg'
+          'https://example.com/image1.jpg',
+          gen_random_uuid()
       ),
       (
           'e2e2e2e2-e2e2-e2e2-e2e2-e2e2e2e2e2e2',
@@ -77,43 +78,42 @@ INSERT INTO events (
           'sport@org2.com',
           1,
           'Регистрация открыта',
-          'https://example.com/image2.jpg'
+          'https://example.com/image2.jpg',
+          gen_random_uuid()
       )
     ON CONFLICT DO NOTHING;
 
 
 
---Добавим ещё 25 мероприятий
+
 DO $$
 BEGIN
 FOR i IN 1..25 LOOP
-        INSERT INTO events (
-            id, title, description, organizer_id, format, location, event_category_id,
-            latitude, longitude, start_time, end_time, contact_info,
-            moderation_status, status_info, image
-        ) VALUES (
-            gen_random_uuid(),
-            'Событие #' || i,
-            'Описание мероприятия номер ' || i,
-            CASE WHEN i % 2 = 0 THEN 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid
-                 ELSE 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid END,
-            CASE WHEN i % 2 = 0 THEN 'OFFLINE' ELSE 'ONLINE' END,
-            'Улица Арамяна, Ереван',
-            CASE
-                WHEN i % 3 = 0 THEN '11111111-1111-1111-1111-111111111111'::uuid
-                WHEN i % 3 = 1 THEN '22222222-2222-2222-2222-222222222222'::uuid
-                ELSE '33333333-3333-3333-3333-333333333333'::uuid
-            END,
-            40.17 + i * 0.001, 44.51 + i * 0.001,
-            now() + (i || ' days')::interval,
-            now() + ((i+1) || ' days')::interval,
-            'info@sobitie' || i || '.am',
-            1,
-            'Описание статуса #' || i,
-            'https://example.com/image' || i || '.jpg'
-        ) ON CONFLICT DO NOTHING;
+    INSERT INTO events (
+        id, title, description, organizer_id, format, location, event_category_id,
+        latitude, longitude, start_time, end_time, contact_info,
+        moderation_status, status_info, image, public_id
+    ) VALUES (
+        gen_random_uuid(),
+        'Событие #' || i,
+        'Описание мероприятия номер ' || i,
+        CASE WHEN i % 2 = 0 THEN 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa'::uuid
+             ELSE 'bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb'::uuid END,
+        CASE WHEN i % 2 = 0 THEN 'OFFLINE' ELSE 'ONLINE' END,
+        'Улица Арамяна, Ереван',
+        CASE
+            WHEN i % 3 = 0 THEN '11111111-1111-1111-1111-111111111111'::uuid
+            WHEN i % 3 = 1 THEN '22222222-2222-2222-2222-222222222222'::uuid
+            ELSE '33333333-3333-3333-3333-333333333333'::uuid
+        END,
+        40.17 + i * 0.001, 44.51 + i * 0.001,
+        now() + (i || ' days')::interval,
+        now() + ((i+1) || ' days')::interval,
+        'info@sobitie' || i || '.am',
+        1,
+        'Описание статуса #' || i,
+        'https://example.com/image' || i || '.jpg',
+        gen_random_uuid()
+    ) ON CONFLICT DO NOTHING;
 END LOOP;
 END $$;
-
-
-

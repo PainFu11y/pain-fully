@@ -6,10 +6,9 @@ import org.platform.entity.event.Event;
 import org.platform.entity.event.EventCategory;
 import org.platform.entity.event.EventTag;
 import org.platform.model.event.EventCategoryDto;
-import org.platform.model.event.EventDto;
 import org.platform.model.event.request.EventCreateRequest;
-import org.platform.repository.EventCategoryRepository;
-import org.platform.repository.EventTagRepository;
+import org.platform.repository.event.EventCategoryRepository;
+import org.platform.repository.event.EventTagRepository;
 import org.platform.repository.OrganizerRepository;
 import org.springframework.stereotype.Component;
 
@@ -66,4 +65,6 @@ public class EventHelper {
         event.setImage(null);
         return event;
     }
+
+
 }

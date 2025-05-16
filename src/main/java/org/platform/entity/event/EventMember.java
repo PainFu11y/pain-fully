@@ -16,10 +16,7 @@ import java.util.List;
 import java.util.UUID;
 
 
-/**
- *  Пользователи которые связаны с мероприятием
- *
- */
+
 @Entity
 @Table(name = DatabaseConstants.EVENTS_MEMBERS_TABLE, schema = DatabaseConstants.SCHEMA)
 @Getter
@@ -36,13 +33,13 @@ public class EventMember {
     @JoinColumn(name = "event_id", nullable = false)
     private Event event;
 
-    @ManyToMany
+    @ManyToOne
     @JoinColumn(name = "member_id", nullable = false)
-    private List<Member> memberList;
+    private Member member;
 
 
 
-    public EventMemberDto toDto(){
+    public EventMemberDto toDto() {
         EventMemberDto dto = new EventMemberDto();
         dto.setId(id);
 
@@ -53,21 +50,21 @@ public class EventMember {
         shortEventDto.setEndTime(event.getEndTime());
         dto.setEvent(shortEventDto);
 
-        dto.setMemberList(memberList.stream()
-                .map(member -> {
-                    MemberDto mDto = new MemberDto();
-                    mDto.setId(member.getId());
-                    mDto.setUsername(member.getUsername());
-                    mDto.setEmail(member.getEmail());
-                    return mDto;
-                }).toList());
+        MemberDto mDto = new MemberDto();
+        mDto.setId(member.getId());
+        mDto.setUsername(member.getUsername());
+        mDto.setEmail(member.getEmail());
+        dto.setMember(mDto);
+
         return dto;
     }
+
     public static EventMember fromDto(EventMemberDto eventMemberDto){
         EventMember eventMember = new EventMember();
         eventMember.setId(eventMemberDto.getId());
         eventMember.setEvent(Event.fromDto(eventMemberDto.getEvent()));
-        eventMember.setMemberList(eventMemberDto.getMemberList().stream().map(Member::fromDto).toList());
+        Member member = Member.fromDto(eventMemberDto.getMember());
+        eventMember.setMember(member);
         return eventMember;
     }
 }

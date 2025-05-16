@@ -1,6 +1,7 @@
 package org.platform.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.platform.enums.constants.RoutConstants;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(RoutConstants.BASE_URL + RoutConstants.VERSION + RoutConstants.USER)
+@Tag(name = "Пользователь (User)", description = "Общие действия для пользователя (MEMBER, ORGANIZER)")
 public class UserController {
     private final UserService userService;
 
@@ -27,7 +29,9 @@ public class UserController {
     @GetMapping("/get-user")
     public ResponseEntity<Object> getUser() {
         log.info("Received request to fetch the current user");
-        return userService.getUser();
+        ResponseEntity<Object> response = userService.getUser();
+        log.info("User fetched successfully");
+        return response;
     }
 
     @Operation(summary = "Отправить код для восстановления пароля (MEMBER,ORGANIZER)")

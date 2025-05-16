@@ -3,14 +3,11 @@ package org.platform.springJpa.organizer;
 import jakarta.persistence.criteria.JoinType;
 import lombok.RequiredArgsConstructor;
 import jakarta.persistence.criteria.Join;
-import org.aspectj.weaver.ast.Or;
-import org.platform.entity.Member;
 import org.platform.entity.Organizer;
 import org.platform.entity.SocialMedia;
 import org.platform.entity.event.Event;
 import org.platform.entity.event.EventTag;
 import org.platform.entity.verification.OrganizerVerification;
-import org.platform.entity.verification.VerificationToken;
 import org.platform.enums.OrganizersVerifyStatus;
 import org.platform.model.event.EventDto;
 import org.platform.model.event.EventFilterRequest;
@@ -20,8 +17,9 @@ import org.platform.model.organizer.OrganizerDto;
 import org.platform.model.organizer.createRequest.OrganizerUpdateRequestDto;
 import org.platform.model.verify.VerifyRequest;
 import org.platform.repository.*;
+import org.platform.repository.event.EventRepository;
 import org.platform.repository.verification.VerificationTokenRepository;
-import org.platform.service.OrganizerService;
+import org.platform.service.organizer.OrganizerService;
 import org.platform.service.email.EmailService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -272,7 +270,7 @@ public class OrganizerSpringJpa implements OrganizerService {
 
     @Transactional
     @Override
-    public boolean verifyEmailVerificationCodeForOrganizer(VerifyRequest verifyRequest) {
+    public boolean verifyEmailVerificationCode(VerifyRequest verifyRequest) {
         String currentEmail = verifyRequest.getEmail();
 
         return verificationTokenRepository.findByToken(verifyRequest.getCode()).map(verificationToken -> {

@@ -6,7 +6,7 @@ import org.platform.entity.FavouriteTag;
 import org.platform.entity.Member;
 import org.platform.entity.event.EventTag;
 import org.platform.model.FavouriteTagDto;
-import org.platform.repository.EventTagRepository;
+import org.platform.repository.event.EventTagRepository;
 import org.platform.repository.FavouriteTagRepository;
 import org.platform.repository.MemberRepository;
 import org.platform.service.FavouriteTagService;
