@@ -26,7 +26,7 @@
 ./gradlew bootRun
 ```
 
-🧩 Features
+## 🧩 Features
 
 Registration and login via email
 
@@ -49,7 +49,7 @@ Upload and display images (Base64)
 Event search and filtering by category (with pagination)
 
 
-📝 MIT License
+## 📝 MIT License
 
 
 Copyright (c) 2025 Vahan Avetisyan
