@@ -39,8 +39,8 @@ Review and rating system for events
 Upload and display images (Base64)
 Event search and filtering by category (with pagination)
 
+📝 MIT License
 
-MIT License
 
 Copyright (c) 2025 Vahan Avetisyan
 
