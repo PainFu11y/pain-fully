@@ -26,18 +26,28 @@
 ./gradlew bootRun
 ```
 
-Features
+🧩 Features
 
 Registration and login via email
+
 Login with Google OAuth2
+
 Email confirmation with 2FA codes
+
 Role-based access: Participant, Organizer, Moderator
+
 Event management (create, edit, delete)
+
 Send HTML invitations to participants via email
+
 Subscribe to events
+
 Review and rating system for events
+
 Upload and display images (Base64)
+
 Event search and filtering by category (with pagination)
+
 
 📝 MIT License
 
