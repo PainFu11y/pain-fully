@@ -17,8 +17,8 @@
 
 1. Clone the repository:
    ```
-   git clone https://github.com/yourusername/eventhub-backend.git
-   cd eventhub-backend
+   git clone https://github.com/PainFu11y/pain-fully
+   cd pain-fully
    ```
 2. Configure the application.yml with your database, email, and JWT settings.
 3. Run the application:
